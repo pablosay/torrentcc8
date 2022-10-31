@@ -1,16 +1,16 @@
 
-
 import java.io.*;
 import java.util.*;
 
 public class DistanceVector {
-	public String esteNodo = "";
+	public String esteNodo;
+	public String archivoConfiguracion;
+	public Log log;
 	public HashMap<String, HashMap<String, String>> ipVecinos = new HashMap<String, HashMap<String, String>>();
 	public HashMap<String, HashMap<String, HashMap<String, String>>> rutas = new HashMap<String, HashMap<String, HashMap<String, String>>>();
 	public LinkedList<String> nodos = new LinkedList<String>();
 	public HashMap<String, HashMap<String, HashMap<String, String>>> dv = new HashMap<String, HashMap<String, HashMap<String, String>>>();
-	public String configuracion = "";
-	public Log log;
+
 	public HashMap<String, String> info = new HashMap<String, String>();
 	public Boolean cambiosDV = false;
 
@@ -18,40 +18,42 @@ public class DistanceVector {
 	public HashMap<String, Boolean> servers = new HashMap<String, Boolean>();
 	public HashMap<String, Boolean> clientes = new HashMap<String, Boolean>();
 
-	public DistanceVector(String configuracion, String esteNodo, Log log) {
-		this.configuracion = configuracion;
+	public DistanceVector(String archivoConfiguracion, String esteNodo, Log log) {
+		this.archivoConfiguracion = archivoConfiguracion;
 		this.esteNodo = esteNodo;
 		this.log = log;
 	}
 
-	/* Configurar el distance vector a partir de el archivo configuracion.txt */
-	public void configurar() {
-		log.print("Iniciando nodo " + this.esteNodo);
+	public void config() {
 		try {
-			File archivo = new File(this.configuracion);
-			FileReader fr = new FileReader(archivo);
-			BufferedReader br = new BufferedReader(fr);
+			File archivo = new File(this.archivoConfiguracion);
+			FileReader filereader = new FileReader(archivo);
+			BufferedReader bufferreader = new BufferedReader(filereader);
 			info = new HashMap<String, String>();
-			String linea = "";
-			while ((linea = br.readLine()) != null) {
-				String[] split_linea = linea.split("->");
-				info.put(split_linea[0], split_linea[1]);
-				HashMap<String, String> host = new HashMap<String, String>();
-				host.put("ip", split_linea[2]);
-				ipVecinos.put(split_linea[0], host);
+			String lineaArchivo = "";
+			while ((lineaArchivo = bufferreader.readLine()) != null) {
+				String[] token = lineaArchivo.split("-");
+				String nodo = token[0];
+				String costo = token[1];
+				String ip = token[2];
+				// Ingresar su nodo y los costos
+				info.put(nodo, costo);
+				HashMap<String, String> ipNumero = new HashMap<String, String>();
+				// Ingresar las IP con sus numeros de IP
+				ipNumero.put("ip", ip);
+				// Ingresar el nodo con su IP.
+				ipVecinos.put(nodo, ipNumero);
 			}
-			br.close();
+			bufferreader.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Error al iniciar la configuración del servidor, DistanceVector.java, configurar");
 		}
-		log.print("Vecinos " + this.ipVecinos);
-		/* Iniciar con el primer Distance Vector */
+		log.print("Adyacentes: " + this.ipVecinos);
 		reiniciarDV(this.info, this.esteNodo, true);
-		/* Agregar las rutas */
 		agregarRuta(this.info, this.esteNodo);
 		this.cambiosDV = true;
-		log.print("Destinos " + this.nodos);
-		log.print("Cambios en el Distance Vector " + cambiosDV);
+		log.print("Destinos: " + this.nodos);
+		log.print("Hay cambios en los vectores de distancia. ");
 		printDV();
 	}
 
@@ -176,16 +178,18 @@ public class DistanceVector {
 			encabazado += "     " + this.nodos.get(i) + "     " + " |";
 		}
 		/*
-		for (var destino : this.nodos.size()) {
-			encabazado += " ".repeat(5) + destino + " ".repeat(5 - destino.length()) + " |";
-		}*/
+		 * for (var destino : this.nodos.size()) {
+		 * encabazado += " ".repeat(5) + destino + " ".repeat(5 - destino.length()) +
+		 * " |";
+		 * }
+		 */
 		for (HashMap<String, HashMap<String, String>> i : this.dv.values()) {
 			for (String destino : i.keySet()) {
 				String texto = i.get(destino).get("costo") + i.get(destino).get("atraves");
-				tabla += "     " + texto + "    "+ " |";
+				tabla += "     " + texto + "    " + " |";
 			}
 		}
-		String enviar ="";
+		String enviar = "";
 		for (int i = 0; i < encabazado.length(); i++) {
 			enviar += "=";
 		}
