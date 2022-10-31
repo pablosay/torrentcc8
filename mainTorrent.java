@@ -2,7 +2,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
-
 public class mainTorrent {
     public static void main(String[] arg) throws Exception {
         Scanner leer = new Scanner(System.in);
@@ -11,7 +10,7 @@ public class mainTorrent {
         String configuracion = "configuracion.txt";
         String esteNodo = "G";
         DistanceVector dv = new DistanceVector(configuracion, esteNodo, log);
-        dv.configurar();
+        dv.config();
 
         // servidor
         Log log1 = new Log("./Log_Servidor.txt");
