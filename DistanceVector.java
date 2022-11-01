@@ -6,30 +6,41 @@ public class DistanceVector {
 	public String esteNodo;
 	public String archivoConfiguracion;
 	public Log log;
-	public HashMap<String, HashMap<String, String>> ipVecinos = new HashMap<String, HashMap<String, String>>();
-	public HashMap<String, HashMap<String, HashMap<String, String>>> rutas = new HashMap<String, HashMap<String, HashMap<String, String>>>();
-	public LinkedList<String> nodos = new LinkedList<String>();
-	public HashMap<String, HashMap<String, HashMap<String, String>>> dv = new HashMap<String, HashMap<String, HashMap<String, String>>>();
 
-	public HashMap<String, String> info = new HashMap<String, String>();
+	public HashMap<String, HashMap<String, InformacionVecino>> vectoresDeDistancia = new HashMap<String, HashMap<String, InformacionVecino>>();
+	public HashMap<String, HashMap<String, String>> ipVecinos = new HashMap<String, HashMap<String, String>>();
+	public HashMap<String, HashMap<String, InformacionVecino>> rutas = new HashMap<String, HashMap<String, InformacionVecino>>();
+	public LinkedList<String> nodos = new LinkedList<String>();
+
+	public HashMap<String, String> vecinosCosto = new HashMap<String, String>();
 	public Boolean cambiosDV = false;
 
 	public HashMap<String, Boolean> informado = new HashMap<String, Boolean>();
 	public HashMap<String, Boolean> servers = new HashMap<String, Boolean>();
 	public HashMap<String, Boolean> clientes = new HashMap<String, Boolean>();
 
+	/**
+	 * 
+	 * @param archivoConfiguracion Archivo para el log
+	 * @param esteNodo             Nodo que identifica este proyecto
+	 * @param log                  Log asignado para el distance vector.
+	 */
 	public DistanceVector(String archivoConfiguracion, String esteNodo, Log log) {
 		this.archivoConfiguracion = archivoConfiguracion;
 		this.esteNodo = esteNodo;
 		this.log = log;
 	}
 
+	/**
+	 * Configuracion de la clase de los vectores de distancia.
+	 */
 	public void config() {
 		try {
 			File archivo = new File(this.archivoConfiguracion);
 			FileReader filereader = new FileReader(archivo);
 			BufferedReader bufferreader = new BufferedReader(filereader);
-			info = new HashMap<String, String>();
+			// Nodo vecino, su costo
+			vecinosCosto = new HashMap<String, String>();
 			String lineaArchivo = "";
 			while ((lineaArchivo = bufferreader.readLine()) != null) {
 				String[] token = lineaArchivo.split("-");
@@ -37,131 +48,135 @@ public class DistanceVector {
 				String costo = token[1];
 				String ip = token[2];
 				// Ingresar su nodo y los costos
-				info.put(nodo, costo);
+				vecinosCosto.put(nodo, costo);
 				HashMap<String, String> ipNumero = new HashMap<String, String>();
 				// Ingresar las IP con sus numeros de IP
 				ipNumero.put("ip", ip);
 				// Ingresar el nodo con su IP.
 				ipVecinos.put(nodo, ipNumero);
+				// Nodo (H) -> (G, ipNumero - > ("ip", 127.0.0.1))
 			}
 			bufferreader.close();
 		} catch (Exception e) {
-			System.out.println("Error al iniciar la configuración del servidor, DistanceVector.java, configurar");
+			System.out.println("Error al iniciar la configuracion del servidor, DistanceVector.java, configurar");
 		}
 		log.print("Adyacentes: " + this.ipVecinos);
-		reiniciarDV(this.info, this.esteNodo, true);
-		agregarRuta(this.info, this.esteNodo);
+		reiniciar(true);
+		nuevaRuta(this.vecinosCosto, this.esteNodo);
 		this.cambiosDV = true;
 		log.print("Destinos: " + this.nodos);
 		log.print("Hay cambios en los vectores de distancia. ");
 		printDV();
 	}
 
-	/*
-	 * Establecer el Distance vector a partir de los datos que se reciben, lo
-	 * reestablece
+	/**
+	 * Reiniciar, se reinicia
+	 * 
+	 * @param costosnodos    Costos Nodos y sus costos asignados
+	 * @param nodo           Nodo de este proyecto
+	 * @param inicializacion Verificar si ya se inicializo
 	 */
-	public void reiniciarDV(HashMap<String, String> datos, String nodo, Boolean inicializacion) {
-		HashMap<String, HashMap<String, String>> costos = new HashMap<String, HashMap<String, String>>();
-		HashMap<String, String> atraves = new HashMap<String, String>();
-		if (!this.nodos.contains(nodo)) {
-			this.nodos.add(nodo);
+	public void reiniciar(Boolean inicializacion) {
+		HashMap<String, InformacionVecino> costos = new HashMap<String, InformacionVecino>();
+		InformacionVecino infovecino = new InformacionVecino(this.esteNodo, 0);
+		if (!this.nodos.contains(this.esteNodo)) {
+			this.nodos.add(this.esteNodo);
 		}
-		atraves.put("atraves", nodo);
-		atraves.put("costo", "0");
-		costos.put(nodo, atraves);
-		for (String nodoi : datos.keySet()) {
-			if (!this.nodos.contains(nodoi)) {
-				this.nodos.add(nodoi);
+
+		// Soy mi propio vecino
+		costos.put(this.esteNodo, infovecino);
+
+		// Agregar ruta de los vecinos con sus costos
+		for (String nodo : this.vecinosCosto.keySet()) {
+			if (!this.nodos.contains(nodo)) {
+				this.nodos.add(nodo);
 			}
-			atraves = new HashMap<String, String>();
-			if (datos.get(nodoi).contains("99")) {
-				atraves.put("atraves", "");
+			infovecino = new InformacionVecino("", 0);
+			// Si el costo es 99 es porque esta desconectado
+			if (this.vecinosCosto.get(nodo).contains("99")) {
+				// Se cambia con quien
+				infovecino.conQuien = "";
 			} else {
-				atraves.put("atraves", nodoi);
+				infovecino.conQuien = nodo;
 			}
-			atraves.put("costo", datos.get(nodoi));
-			costos.put(nodoi, atraves);
+			infovecino.costo = Integer.parseInt(this.vecinosCosto.get(nodo));
+			costos.put(nodo, infovecino);
+			// Si estamos inicializando
 			if (inicializacion) {
-				this.clientes.put(nodoi, false);
-				this.informado.put(nodoi, false);
-				this.servers.put(nodoi, false);
+				this.clientes.put(nodo, false);
+				this.informado.put(nodo, false);
+				this.servers.put(nodo, false);
 			}
 		}
-		this.dv.put(nodo, costos);
+		this.vectoresDeDistancia.put(this.esteNodo, costos);
 	}
 
-	/* Agregar una nueva ruta */
-	public void agregarRuta(HashMap<String, String> datos, String vecino) {
-		HashMap<String, HashMap<String, String>> costos = new HashMap<String, HashMap<String, String>>();
-		HashMap<String, String> atraves = new HashMap<String, String>();
+	public void nuevaRuta(HashMap<String, String> datos, String nuevoVecino) {
+		HashMap<String, InformacionVecino> costos = new HashMap<String, InformacionVecino>();
+		InformacionVecino infovecino = new InformacionVecino(this.esteNodo, 0);
 
-		if (!this.nodos.contains(vecino)) {
-			this.nodos.add(vecino);
+		if (!this.nodos.contains(nuevoVecino)) {
+			this.nodos.add(nuevoVecino);
 		}
-		atraves.put("atraves", vecino);
-		atraves.put("costo", "0");
-		costos.put(vecino, atraves);
+		infovecino.conQuien = nuevoVecino;
+		infovecino.costo = 0;
+		costos.put(nuevoVecino, infovecino);
 
-		for (String vecinoi : datos.keySet()) {
-			if (!this.nodos.contains(vecinoi)) {
-				this.nodos.add(vecinoi);
+		for (String vecino : datos.keySet()) {
+			if (!this.nodos.contains(vecino)) {
+				this.nodos.add(vecino);
 			}
-			atraves = new HashMap<String, String>();
-			atraves.put("atraves", vecinoi);
-			atraves.put("costo", datos.get(vecinoi));
-			costos.put(vecinoi, atraves);
+			infovecino = new InformacionVecino(vecino, Integer.parseInt(datos.get(vecino)));
+			costos.put(vecino, infovecino);
 		}
-		if (this.rutas.containsKey(vecino)) {
-			this.rutas.replace(vecino, costos);
+		if (this.rutas.containsKey(nuevoVecino)) {
+			this.rutas.replace(nuevoVecino, costos);
 		} else {
-			this.rutas.put(vecino, costos);
+			this.rutas.put(nuevoVecino, costos);
 		}
 
-		if (!this.esteNodo.contains(vecino)) {
-			if (this.rutas.get(this.esteNodo).get(vecino).get("costo").contains("99")) {
-				String nuevoCosto = this.rutas.get(vecino).get(this.esteNodo).get("costo");
-				this.rutas.get(this.esteNodo).get(vecino).replace("costo", nuevoCosto);
-				this.rutas.get(this.esteNodo).get(vecino).replace("atraves", vecino);
+		if (!this.esteNodo.contains(nuevoVecino)) {
+			if (this.rutas.get(this.esteNodo).get(nuevoVecino).costo == 99) {
+				int nuevoCosto = this.rutas.get(nuevoVecino).get(this.esteNodo).costo;
+				// this.rutas.get(this.esteNodo).get(nuevoVecino).replace("costo", nuevoCosto);
+				this.rutas.get(this.esteNodo).get(nuevoVecino).costo = nuevoCosto;
+				this.rutas.get(this.esteNodo).get(nuevoVecino).conQuien = nuevoVecino;
 			}
 		}
 	}
 
 	/* Estimar las rutas minimas para ir a un nodo de la red */
 	public void calcular(String vecino) {
-		String before = this.dv.toString();
+
+		String antesDePosibleCambio = this.vectoresDeDistancia.toString();
 		this.log.print("Recalcular Distance Vector con rutas de " + vecino);
 		for (String destino : nodos) {
-			HashMap<String, String> atraves = new HashMap<String, String>();
-			if (!this.dv.get(this.esteNodo).containsKey(destino)) {
-				atraves = new HashMap<String, String>();
-				atraves.put("costo", "99");
-				atraves.put("atraves", "");
-				this.dv.get(this.esteNodo).put(destino, atraves);
+			InformacionVecino infovecino;
+			if (!this.vectoresDeDistancia.get(this.esteNodo).containsKey(destino)) {
+				infovecino = new InformacionVecino("", 99);
+				this.vectoresDeDistancia.get(this.esteNodo).put(destino, infovecino);
 			}
 			/* Algoritmo de Bellman-Ford */
-			int c_me_to_vecino = 99;
+			int a = 99;
 			if (this.rutas.get(this.esteNodo).containsKey(vecino)) {
-				c_me_to_vecino = Integer.parseInt(this.rutas.get(this.esteNodo).get(vecino).get("costo"));
+				a = this.rutas.get(this.esteNodo).get(vecino).costo;
 			}
-			int c_vecino_to_dest = 99;
+			int b = 99;
 			if (this.rutas.get(vecino).containsKey(destino)) {
-				c_vecino_to_dest = Integer.parseInt(this.rutas.get(vecino).get(destino).get("costo"));
+				b = this.rutas.get(vecino).get(destino).costo;
 			}
 			// Total
-			int total = (c_me_to_vecino + c_vecino_to_dest) > 99 ? 99 : (c_me_to_vecino + c_vecino_to_dest);
+			int total = (a + b) > 99 ? 99 : (a + b);
 			// Comparar el costo y actualizar si fuera necesario en el DV
-			int costoActual = Integer.parseInt(this.dv.get(this.esteNodo).get(destino).get("costo"));
+			int costoActual = this.vectoresDeDistancia.get(this.esteNodo).get(destino).costo;
 			if (total < costoActual) {
-				atraves = new HashMap<String, String>();
-				atraves.put("costo", Integer.toString(total));
-				atraves.put("atraves", vecino);
-				this.dv.get(this.esteNodo).replace(destino, atraves);
+				infovecino = new InformacionVecino(vecino, total);
+				this.vectoresDeDistancia.get(this.esteNodo).replace(destino, infovecino);
 			}
 		}
-		String after = this.dv.toString();
+		String despuesDePosibleCambio = this.vectoresDeDistancia.toString();
 		printDV();
-		if (!before.equals(after)) {
+		if (!antesDePosibleCambio.equals(despuesDePosibleCambio)) {
 			this.cambiosDV = true;
 			for (String vecinoinformado : this.informado.keySet()) {
 				this.informado.replace(vecinoinformado, false);
@@ -177,15 +192,9 @@ public class DistanceVector {
 		for (int i = 0; i < this.nodos.size(); i++) {
 			encabazado += "     " + this.nodos.get(i) + "     " + " |";
 		}
-		/*
-		 * for (var destino : this.nodos.size()) {
-		 * encabazado += " ".repeat(5) + destino + " ".repeat(5 - destino.length()) +
-		 * " |";
-		 * }
-		 */
-		for (HashMap<String, HashMap<String, String>> i : this.dv.values()) {
+		for (HashMap<String, InformacionVecino> i : this.vectoresDeDistancia.values()) {
 			for (String destino : i.keySet()) {
-				String texto = i.get(destino).get("costo") + i.get(destino).get("atraves");
+				String texto = i.get(destino).costo + i.get(destino).conQuien;
 				tabla += "     " + texto + "    " + " |";
 			}
 		}
@@ -238,13 +247,13 @@ public class DistanceVector {
 				if (vecinoi.equals(vecino)) {
 					datos.put(vecinoi, costo);
 				} else {
-					String costooriginal = this.rutas.get(this.esteNodo).get(vecinoi).get("costo");
+					String costooriginal = String.valueOf(this.rutas.get(this.esteNodo).get(vecinoi).costo);
 					datos.put(vecinoi, costooriginal);
 				}
 			}
 		}
-		this.reiniciarDV(datos, this.esteNodo, false);
-		this.agregarRuta(datos, this.esteNodo);
+		this.reiniciar(false);
+		this.nuevaRuta(datos, this.esteNodo);
 		this.cambiosDV = true;
 		for (String vecinoinformado : this.informado.keySet()) {
 			this.informado.replace(vecinoinformado, false);

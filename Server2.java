@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
-
 public class Server2 implements Runnable {
     protected Socket socket;
     protected DistanceVector dv;
@@ -69,7 +68,7 @@ public class Server2 implements Runnable {
                                 this.log.print("Cliente solicita " + mensajeCliente);
                                 // saber cual es la ruta minima a partir del Distance Vector para enviar el
                                 // mensaje
-                                String rutaMinima = this.dv.dv.get(this.dv.esteNodo).get(de).get("atraves");
+                                String rutaMinima = this.dv.vectoresDeDistancia.get(this.dv.esteNodo).get(de).conQuien;
                                 this.log.print("Contestar peticion a " + de + " por medio de " + rutaMinima);
                                 String ipRutaMinima = this.dv.ipVecinos.get(rutaMinima).get("ip");
                                 // conectarse con el servidor para reenviar la informacion
@@ -77,7 +76,7 @@ public class Server2 implements Runnable {
                                 // abrir conexion con el destinatario
                                 Socket socketReenvio = new Socket(ipRutaMinima, this.puerto);
                                 PrintWriter outSocket = new PrintWriter(socketReenvio.getOutputStream(), true);
-                                if(this.mensaje!=""){
+                                if (this.mensaje != "") {
                                     String mensaje = "";
                                     mensaje = "From:" + dv.esteNodo;
                                     mensaje += "\nTo:" + de;
@@ -87,7 +86,7 @@ public class Server2 implements Runnable {
                                     outSocket.close();
                                     socketReenvio.close();
                                     break;
-                                }                                
+                                }
                                 // enviar archivos alternados
                                 Integer comienzo = 1;
                                 Integer finaal = archivo.size();
@@ -151,22 +150,23 @@ public class Server2 implements Runnable {
                                 // darle valor a sizeArchivoLocal
                                 sizeArchivoLocal += dataArchivo.length() / 2;
                                 if (sizeArchivoLocal >= Integer.parseInt(sizeArchivo)) {
-                                    this.log.print(archivo.size() + " chunks recibidos de archivo " + nombreArchivo + " de " + de + " para mi ");
+                                    this.log.print(archivo.size() + " chunks recibidos de archivo " + nombreArchivo
+                                            + " de " + de + " para mi ");
                                     String archivoStr = "";
                                     for (Integer i : archivo.keySet()) {
-                                        archivoStr = archivoStr + archivo.get(i);  //obtener todos los chunks
+                                        archivoStr = archivoStr + archivo.get(i); // obtener todos los chunks
                                     }
-                                    //System.out.println("archivo : " + archivoStr);                            
+                                    // System.out.println("archivo : " + archivoStr);
                                     byte[] archivo = hexStringToByteArray(archivoStr);
-                                    
+
                                     Path path = Paths.get(nombreArchivo);
                                     String file = path.getFileName().toString();
-        
-                                    File archivoFile = new File("./Recibidos/" +file);
+
+                                    File archivoFile = new File("./Recibidos/" + file);
                                     OutputStream os = new FileOutputStream(archivoFile);
                                     os.write(archivo);
                                     os.close();
-                                    this.log.print("Archivo guardado : " + nombreArchivo); 
+                                    this.log.print("Archivo guardado : " + nombreArchivo);
                                     break;
                                 }
                             }
@@ -206,7 +206,8 @@ public class Server2 implements Runnable {
                                 this.log.print("Cliente solicita " + mensajeCliente);
                                 // saber cual es la ruta minima a partir del Distance Vector para enviar el
                                 // mensaje
-                                String rutaMinima = this.dv.dv.get(this.dv.esteNodo).get(para).get("atraves");
+                                String rutaMinima = this.dv.vectoresDeDistancia.get(this.dv.esteNodo)
+                                        .get(para).conQuien;
                                 this.log.print("Reenviar peticion a " + para + " por medio de " + rutaMinima);
                                 String ipRutaMinima = this.dv.ipVecinos.get(rutaMinima).get("ip");
                                 // conectarse con el servidor para reenviar la informacion
@@ -244,7 +245,8 @@ public class Server2 implements Runnable {
                                 // darle valor a sizeArchivoLocal
                                 sizeArchivoLocal += dataArchivo.length() / 2;
                                 if (sizeArchivoLocal >= Integer.parseInt(sizeArchivo)) {
-                                    String rutaMinima = this.dv.dv.get(this.dv.esteNodo).get(para).get("atraves");
+                                    String rutaMinima = this.dv.vectoresDeDistancia.get(this.dv.esteNodo)
+                                            .get(para).conQuien;
                                     this.log.print("Reenviar archivo " + nombreArchivo + " de " + archivo.size()
                                             + " chunks a " + para + " por medio de " + rutaMinima);
                                     String ipRutaMinima = this.dv.ipVecinos.get(rutaMinima).get("ip");
@@ -278,7 +280,7 @@ public class Server2 implements Runnable {
                             this.log.print("Cliente solicita " + mensajeCliente);
                             // saber cual es la ruta minima a partir del Distance Vector para enviar el
                             // mensaje
-                            String rutaMinima = this.dv.dv.get(this.dv.esteNodo).get(para).get("atraves");
+                            String rutaMinima = this.dv.vectoresDeDistancia.get(this.dv.esteNodo).get(para).conQuien;
                             this.log.print("Reenviar mensaje a " + para + " por medio de " + rutaMinima);
                             String ipRutaMinima = this.dv.ipVecinos.get(rutaMinima).get("ip");
                             /* Conectarme al servidor forward del vecino */
@@ -345,7 +347,7 @@ public class Server2 implements Runnable {
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                                 + Character.digit(s.charAt(i+1), 16));
+                    + Character.digit(s.charAt(i + 1), 16));
         }
         return data;
     }

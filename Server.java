@@ -1,5 +1,4 @@
 
-
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashMap;
@@ -27,11 +26,14 @@ public class Server implements Runnable {
             PrintWriter outSocket = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader inSocket = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             while (true) {
+                // Recibir mensaje del cliente
                 String mensajeCliente = inSocket.readLine();
                 if (mensajeCliente == null) {
                     break;
                 }
-                this.log.print("Cliente solicita " + mensajeCliente);
+                // Imprimir mensaje del cliente al log
+                this.log.print(mensajeCliente);
+                // Verificar si tiene un From
                 if (mensajeCliente.contains("From:")) {
                     String[] tokens = mensajeCliente.split(":");
                     this.vecino = tokens[1];
@@ -66,7 +68,7 @@ public class Server implements Runnable {
                             }
                         }
                         this.log.print(vecino + " envio -> " + datos);
-                        dv.agregarRuta(datos, vecino); // agregar la nueva ruta, para despues calcular
+                        dv.nuevaRuta(datos, vecino); // agregar la nueva ruta, para despues calcular
                         dv.calcular(vecino); // establecer los costos minimos nuevamente
                     } else if (type.contains("KeepAlive")) {
                         // No se hace nada en el keepalive, solo se hace print
@@ -75,7 +77,7 @@ public class Server implements Runnable {
                     continue;
                 }
             }
-           
+
             /* Si llega aqui se desconecto */
             this.log.print("Se perdio conexion con " + this.vecino);
             this.dv.updateclientes(this.vecino, false);
@@ -92,7 +94,7 @@ public class Server implements Runnable {
                 }
             }
         } catch (SocketException e) {
-            
+
             if (e.toString().contains("Connection reset")) {
                 /* Si entra a esta excepcion es por que se desconecto */
                 try {

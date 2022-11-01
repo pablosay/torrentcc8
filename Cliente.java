@@ -1,5 +1,4 @@
 
-
 import java.net.Socket;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
@@ -64,10 +63,11 @@ public class Cliente implements Runnable {
                 log.print("Enviar DV a " + this.vecino);
                 mensaje = "From:" + dv.esteNodo;
                 mensaje += "\nType:DV";
-                mensaje += "\nLen:" + (dv.dv.get(dv.esteNodo).size() - 1);
-                for (String vecinoi : dv.dv.get(dv.esteNodo).keySet()) {
+                mensaje += "\nLen:" + (dv.vectoresDeDistancia.get(dv.esteNodo).size() - 1);
+                for (String vecinoi : dv.vectoresDeDistancia.get(dv.esteNodo).keySet()) {
                     if (!vecinoi.equals(dv.esteNodo)) {
-                        mensaje += "\n" + vecinoi + ":" + dv.dv.get(dv.esteNodo).get(vecinoi).get("costo");
+                        mensaje += "\n" + vecinoi + ":"
+                                + dv.vectoresDeDistancia.get(dv.esteNodo).get(vecinoi).costo;
                     }
                 }
                 outSocket.println(mensaje);
@@ -89,11 +89,11 @@ public class Cliente implements Runnable {
                                 log.print("Enviar DV a " + this.vecino);
                                 mensaje = "From:" + dv.esteNodo;
                                 mensaje += "\nType:DV";
-                                mensaje += "\nLen:" + (dv.dv.get(dv.esteNodo).size() - 1);
-                                for (String vecinoi : dv.dv.get(dv.esteNodo).keySet()) {
+                                mensaje += "\nLen:" + (dv.vectoresDeDistancia.get(dv.esteNodo).size() - 1);
+                                for (String vecinoi : dv.vectoresDeDistancia.get(dv.esteNodo).keySet()) {
                                     if (!vecinoi.equals(dv.esteNodo)) {
                                         mensaje += "\n" + vecinoi + ":"
-                                                + dv.dv.get(dv.esteNodo).get(vecinoi).get("costo");
+                                                + dv.vectoresDeDistancia.get(dv.esteNodo).get(vecinoi).costo;
                                     }
                                 }
                                 outSocket.println(mensaje);
@@ -115,7 +115,10 @@ public class Cliente implements Runnable {
                         this.dv.updateservers(this.vecino, false);
                         break;
                     }
-                    /* Si todos los vecinos ya fueron informados, regresar a false la variable cambiosDV */
+                    /*
+                     * Si todos los vecinos ya fueron informados, regresar a false la variable
+                     * cambiosDV
+                     */
                     Integer acumulador = 0;
                     for (Boolean status : dv.informado.values()) {
                         if (status) {
