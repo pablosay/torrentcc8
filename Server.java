@@ -32,7 +32,7 @@ public class Server implements Runnable {
                     break;
                 }
                 // Imprimir mensaje del cliente al log
-                this.log.print(mensajeCliente);
+                this.log.print("" + mensajeCliente);
                 // Verificar si tiene un From
                 if (mensajeCliente.contains("From:")) {
                     String[] tokens = mensajeCliente.split(":");
@@ -54,7 +54,7 @@ public class Server implements Runnable {
                         Integer locallen = 1;
                         while (!leerDV) {
                             mensajeCliente = inSocket.readLine();
-                            this.log.print("Cliente solicita " + mensajeCliente);
+                            this.log.print(" " + mensajeCliente);
                             if (mensajeCliente.contains("Len")) {
                                 tokens = mensajeCliente.split(":");
                                 len = Integer.parseInt(tokens[1]);
@@ -79,7 +79,7 @@ public class Server implements Runnable {
             }
 
             /* Si llega aqui se desconecto */
-            this.log.print("Se perdio conexion con " + this.vecino);
+            this.log.print(" Se perdio conexion con " + this.vecino);
             this.dv.updateclientes(this.vecino, false);
             this.dv.updateinformado(this.vecino, true);
             while (true) {
@@ -103,11 +103,11 @@ public class Server implements Runnable {
                     while (true) {
                         Thread.sleep(this.reconexion * 1000);
                         if (!this.dv.clientes.get(this.vecino)) {
-                            log.print(this.vecino + " ya no se conecto");
+                            log.print(" " + this.vecino + " ya no se conecto");
                             this.dv.updateCostoVecino(this.vecino);
                             break;
                         } else {
-                            log.print(this.vecino + " se conecto de nuevo");
+                            log.print(" " + this.vecino + " se conecto de nuevo");
                             break;
                         }
                     }

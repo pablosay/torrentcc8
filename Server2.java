@@ -38,7 +38,7 @@ public class Server2 implements Runnable {
                     if (mensajeCliente == null) {
                         break;
                     }
-                    this.log.print("Cliente solicita " + mensajeCliente);
+                    this.log.print(" " + mensajeCliente);
                     String[] tokens = mensajeCliente.split(":");
                     if (mensajeCliente.contains("From:")) {
                         de = tokens[1].trim();
@@ -51,21 +51,21 @@ public class Server2 implements Runnable {
                 // Saber si el mensaje viene para mi o es para reenviar
                 if (para.equals(dv.esteNodo)) {
                     String mensajeCliente = inSocket.readLine();
-                    this.log.print("Cliente solicita " + mensajeCliente);
+                    this.log.print(" " + mensajeCliente);
                     if (mensajeCliente != null) {
                         if (mensajeCliente.contains("Name:")) {
                             // es una petcion o una respuesta
                             String[] tokens = mensajeCliente.split(":");
                             String nombreArchivo = tokens[1].trim();
                             mensajeCliente = inSocket.readLine();
-                            this.log.print("Cliente solicita " + mensajeCliente);
+                            this.log.print(" " + mensajeCliente);
 
                             if (mensajeCliente.contains("Size")) {
                                 // es una peticion
                                 tokens = mensajeCliente.split(":");
                                 String sizeArchivo = tokens[1].trim();
                                 mensajeCliente = inSocket.readLine();
-                                this.log.print("Cliente solicita " + mensajeCliente);
+                                this.log.print(" " + mensajeCliente);
                                 // saber cual es la ruta minima a partir del Distance Vector para enviar el
                                 // mensaje
                                 String rutaMinima = this.dv.vectoresDeDistancia.get(this.dv.esteNodo).get(de).conQuien;
@@ -134,17 +134,17 @@ public class Server2 implements Runnable {
                                 String dataArchivo = tokens[1].trim();
                                 // leer el numero de frag
                                 mensajeCliente = inSocket.readLine();
-                                this.log.print("Cliente solicita " + mensajeCliente);
+                                this.log.print(" " + mensajeCliente);
                                 tokens = mensajeCliente.split(":");
                                 String fragArchivo = tokens[1].trim();
                                 // leer el size
                                 mensajeCliente = inSocket.readLine();
-                                this.log.print("Cliente solicita " + mensajeCliente);
+                                this.log.print(" " + mensajeCliente);
                                 tokens = mensajeCliente.split(":");
                                 String sizeArchivo = tokens[1].trim();
                                 // leer eof
                                 mensajeCliente = inSocket.readLine();
-                                this.log.print("Cliente solicita " + mensajeCliente);
+                                this.log.print(" " + mensajeCliente);
                                 // agregar el fragmento a mi temporal
                                 archivo.put(Integer.parseInt(fragArchivo), dataArchivo);
                                 // darle valor a sizeArchivoLocal
@@ -175,7 +175,7 @@ public class Server2 implements Runnable {
                             String[] tokens = mensajeCliente.split(":");
                             String msg = tokens[1].trim();
                             mensajeCliente = inSocket.readLine();
-                            this.log.print("Cliente solicita " + mensajeCliente);
+                            this.log.print(" " + mensajeCliente);
                             this.log.print("Ocurrion un error al recibir el archivo: " + msg);
                             break;
                         } else {
@@ -189,25 +189,26 @@ public class Server2 implements Runnable {
                 } else {
                     // Area del reenvio
                     String mensajeCliente = inSocket.readLine();
-                    this.log.print("Cliente solicita " + mensajeCliente);
+                    this.log.print(" " + mensajeCliente);
                     if (mensajeCliente != null) {
                         if (mensajeCliente.contains("Name:")) {
                             // es una petcion o una respuesta
                             String[] tokens = mensajeCliente.split(":");
                             String nombreArchivo = tokens[1].trim();
                             mensajeCliente = inSocket.readLine();
-                            this.log.print("Cliente solicita " + mensajeCliente);
+                            this.log.print(" " + mensajeCliente);
 
                             if (mensajeCliente.contains("Size")) {
                                 // es una peticion
                                 tokens = mensajeCliente.split(":");
                                 String tamanioArchivo = tokens[1].trim();
                                 mensajeCliente = inSocket.readLine();
-                                this.log.print("Cliente solicita " + mensajeCliente);
+                                this.log.print(" " + mensajeCliente);
                                 // saber cual es la ruta minima a partir del Distance Vector para enviar el
                                 // mensaje
                                 String rutaMinima = this.dv.vectoresDeDistancia.get(this.dv.esteNodo)
                                         .get(para).conQuien;
+                                System.out.println(this.dv.vectoresDeDistancia.toString());
                                 this.log.print("Reenviar peticion a " + para + " por medio de " + rutaMinima);
                                 String ipRutaMinima = this.dv.ipVecinos.get(rutaMinima).get("ip");
                                 // conectarse con el servidor para reenviar la informacion
@@ -229,17 +230,17 @@ public class Server2 implements Runnable {
                                 String dataArchivo = tokens[1].trim();
                                 // leer el numero de frag
                                 mensajeCliente = inSocket.readLine();
-                                this.log.print("Cliente solicita " + mensajeCliente);
+                                this.log.print(" " + mensajeCliente);
                                 tokens = mensajeCliente.split(":");
                                 String fragArchivo = tokens[1].trim();
                                 // leer el size
                                 mensajeCliente = inSocket.readLine();
-                                this.log.print("Cliente solicita " + mensajeCliente);
+                                this.log.print(" " + mensajeCliente);
                                 tokens = mensajeCliente.split(":");
                                 String sizeArchivo = tokens[1].trim();
                                 // leer eof
                                 mensajeCliente = inSocket.readLine();
-                                this.log.print("Cliente solicita " + mensajeCliente);
+                                this.log.print(" " + mensajeCliente);
                                 // agregar el fragmento a mi temporal
                                 archivo.put(Integer.parseInt(fragArchivo), dataArchivo);
                                 // darle valor a sizeArchivoLocal
@@ -277,11 +278,11 @@ public class Server2 implements Runnable {
                             String[] tokens = mensajeCliente.split(":");
                             String msg = tokens[1].trim();
                             mensajeCliente = inSocket.readLine();
-                            this.log.print("Cliente solicita " + mensajeCliente);
+                            this.log.print(" " + mensajeCliente);
                             // saber cual es la ruta minima a partir del Distance Vector para enviar el
                             // mensaje
                             String rutaMinima = this.dv.vectoresDeDistancia.get(this.dv.esteNodo).get(para).conQuien;
-                            this.log.print("Reenviar mensaje a " + para + " por medio de " + rutaMinima);
+                            this.log.print(" Reenviar mensaje a " + para + " por medio de " + rutaMinima);
                             String ipRutaMinima = this.dv.ipVecinos.get(rutaMinima).get("ip");
                             /* Conectarme al servidor forward del vecino */
                             Socket socketReenvio = new Socket(ipRutaMinima, this.puerto);
@@ -297,11 +298,11 @@ public class Server2 implements Runnable {
                             socketReenvio.close();
                             break;
                         } else {
-                            log.print("El cliente " + de + " envio una peticion incorrecta");
+                            log.print(" El cliente " + de + " envio una peticion incorrecta");
                             break;
                         }
                     } else {
-                        log.print("El cliente " + de + " mando null");
+                        log.print(" El cliente " + de + " mando null");
                         break;
                     }
 

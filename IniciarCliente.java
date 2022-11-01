@@ -15,7 +15,7 @@ public class IniciarCliente implements Runnable {
             for (String vecino : dv.ipVecinos.keySet()) {
                 if (!dv.servers.get(vecino)) {
                     String ip = this.dv.ipVecinos.get(vecino).get("ip");
-                    this.log.print("Establecer primera conexion con " + vecino);
+                    this.log.print(" Primera conexion con " + vecino);
                     Cliente cliente = new Cliente(ip, this.puerto, this.dv, this.log, vecino, this.retransmitir);
                     new Thread(cliente).start();
                 }
@@ -26,7 +26,7 @@ public class IniciarCliente implements Runnable {
                 for (String vecino : dv.ipVecinos.keySet()) {
                     if (dv.clientes.get(vecino) && !dv.servers.get(vecino)) {
                         String ip = this.dv.ipVecinos.get(vecino).get("ip");
-                        this.log.print("Reconexion con " + vecino);
+                        this.log.print(" Reconexion con " + vecino);
                         Cliente client = new Cliente(ip, this.puerto, this.dv, this.log, vecino, this.retransmitir);
                         new Thread(client).start();
                     }

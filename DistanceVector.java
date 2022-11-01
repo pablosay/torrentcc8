@@ -60,6 +60,7 @@ public class DistanceVector {
 		} catch (Exception e) {
 			System.out.println("Error al iniciar la configuracion del servidor, DistanceVector.java, configurar");
 		}
+		System.out.println(ipVecinos.toString());
 		log.print("Adyacentes: " + this.ipVecinos);
 		reiniciar(true);
 		nuevaRuta(this.vecinosCosto, this.esteNodo);
@@ -186,27 +187,7 @@ public class DistanceVector {
 
 	/* Dibujar el Distance vector */
 	public void printDV() {
-		String encabazado = " " + " |";
-		String tabla = this.esteNodo + " |";
-		Collections.sort(this.nodos);
-		for (int i = 0; i < this.nodos.size(); i++) {
-			encabazado += "     " + this.nodos.get(i) + "     " + " |";
-		}
-		for (HashMap<String, InformacionVecino> i : this.vectoresDeDistancia.values()) {
-			for (String destino : i.keySet()) {
-				String texto = i.get(destino).costo + i.get(destino).conQuien;
-				tabla += "     " + texto + "    " + " |";
-			}
-		}
-		String enviar = "";
-		for (int i = 0; i < encabazado.length(); i++) {
-			enviar += "=";
-		}
-		log.print(enviar);
-		log.print(encabazado);
-		log.print(enviar);
-		log.print(tabla);
-		log.print(enviar);
+		log.print("DV: " + this.vectoresDeDistancia.toString());
 	}
 
 	/* Cuando se envia el distance vector a un vecino se actualiza a informado */

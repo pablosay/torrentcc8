@@ -36,7 +36,7 @@ public class Cliente implements Runnable {
             if (this.socket != null) {
                 PrintWriter outSocket = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader inSocket = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                this.log.print("Enviar HELLO a " + this.vecino);
+                this.log.print(" HELLO: " + this.vecino);
                 String mensaje = "From:" + dv.esteNodo;
                 mensaje += "\nType:HELLO";
                 outSocket.println(mensaje);
@@ -60,7 +60,6 @@ public class Cliente implements Runnable {
                 }
 
                 /* Enviar el distance vector */
-                log.print("Enviar DV a " + this.vecino);
                 mensaje = "From:" + dv.esteNodo;
                 mensaje += "\nType:DV";
                 mensaje += "\nLen:" + (dv.vectoresDeDistancia.get(dv.esteNodo).size() - 1);
@@ -71,7 +70,7 @@ public class Cliente implements Runnable {
                     }
                 }
                 outSocket.println(mensaje);
-                this.log.print("DV enviado a " + this.vecino);
+                this.log.print(" DV enviado a " + this.vecino);
                 /* actualizar que ya le envie el distance vector */
                 dv.updateinformado(this.vecino, true);
 
@@ -79,14 +78,13 @@ public class Cliente implements Runnable {
                 while (true) {
                     Thread.sleep(this.retransmitir * 1000);
                     if (dv.cambiosDV) {
-                        log.print("Hay cambios en el Distance Vector " + dv.cambiosDV);
+                        log.print(" Cambios DV: " + dv.cambiosDV);
                     } else {
-                        log.print("No hay cambios en el Distance Vector " + dv.cambiosDV);
+                        log.print(" No hay cambios DV " + dv.cambiosDV);
                     }
                     if (dv.clientes.get(this.vecino)) {
                         if (dv.servers.get(this.vecino)) {
                             if (dv.cambiosDV && !dv.informado.get(this.vecino)) {
-                                log.print("Enviar DV a " + this.vecino);
                                 mensaje = "From:" + dv.esteNodo;
                                 mensaje += "\nType:DV";
                                 mensaje += "\nLen:" + (dv.vectoresDeDistancia.get(dv.esteNodo).size() - 1);
@@ -97,21 +95,21 @@ public class Cliente implements Runnable {
                                     }
                                 }
                                 outSocket.println(mensaje);
-                                this.log.print(this.vecino + " se le envio el DV");
+                                this.log.print(" Se envio el DV" + this.vecino);
                                 dv.updateinformado(this.vecino, true);
                             } else {
-                                log.print("Enviar KeepAlive a " + this.vecino);
+                                log.print(" Enviar KeepAlive a " + this.vecino);
                                 mensaje = "From:" + dv.esteNodo;
                                 mensaje += "\nType:KeepAlive";
                                 outSocket.println(mensaje);
                             }
                         } else {
-                            log.print("No se puede enviar informacion a (1) " + this.vecino);
+                            log.print(" No se puede enviar informacion a " + this.vecino);
                             this.dv.updateservers(this.vecino, false);
                             break;
                         }
                     } else {
-                        log.print("No se puede enviar informacion a (2) " + this.vecino);
+                        log.print(" No se puede enviar informacion a (2) " + this.vecino);
                         this.dv.updateservers(this.vecino, false);
                         break;
                     }
@@ -130,7 +128,7 @@ public class Cliente implements Runnable {
                     }
                 }
             } else {
-                this.log.print("No se logro conectar con " + this.vecino);
+                this.log.print(" No se logro conectar con " + this.vecino);
                 dv.updateinformado(this.vecino, true);
             }
         } catch (Exception e) {
