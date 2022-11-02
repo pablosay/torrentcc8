@@ -1,33 +1,33 @@
 public class IniciarCliente implements Runnable {
-    int retransmitir;
+    int reconectar;
     Log log;
-    DistanceVector dv;
-    int puerto = 9080;
+    DistanceVector dVector;
+    int port = 9080;
 
-    public IniciarCliente(int retransmitir, Log log, DistanceVector dv) {
-        this.retransmitir = retransmitir;
+    public IniciarCliente(int reconectar, Log log, DistanceVector dVector) {
+        this.reconectar = reconectar;
         this.log = log;
-        this.dv = dv;
+        this.dVector = dVector;
     }
 
     public void run() {
         try {
-            for (String vecino : dv.ipVecinos.keySet()) {
-                if (!dv.servers.get(vecino)) {
-                    String ip = this.dv.ipVecinos.get(vecino).get("ip");
+            for (String vecino : dVector.ipVecinos.keySet()) {
+                if (!dVector.servers.get(vecino)) {
+                    String ip = this.dVector.ipVecinos.get(vecino).get("ip");
                     this.log.print(" Primera conexion con " + vecino);
-                    Cliente cliente = new Cliente(ip, this.puerto, this.dv, this.log, vecino, this.retransmitir);
+                    Cliente cliente = new Cliente(ip, this.port, this.dVector, this.log, vecino, this.reconectar);
                     new Thread(cliente).start();
                 }
             }
 
             while (true) {
                 Thread.sleep(10 * 1000);
-                for (String vecino : dv.ipVecinos.keySet()) {
-                    if (dv.clientes.get(vecino) && !dv.servers.get(vecino)) {
-                        String ip = this.dv.ipVecinos.get(vecino).get("ip");
+                for (String vecino : dVector.ipVecinos.keySet()) {
+                    if (dVector.clientes.get(vecino) && !dVector.servers.get(vecino)) {
+                        String ip = this.dVector.ipVecinos.get(vecino).get("ip");
                         this.log.print(" Reconexion con " + vecino);
-                        Cliente client = new Cliente(ip, this.puerto, this.dv, this.log, vecino, this.retransmitir);
+                        Cliente client = new Cliente(ip, this.port, this.dVector, this.log, vecino, this.reconectar);
                         new Thread(client).start();
                     }
                 }
