@@ -31,12 +31,12 @@ public class Server2 implements Runnable {
                         break;
                     }
                     log.print(" " + msg);
-                    msg.replaceAll("\\s+", "").split("/");
                     String[] tokens = msg.split(":");
                     if (msg.contains("From:")) {
-                        de = tokens[1];
+                        de = tokens[1].trim();
+                        continue;
                     } else if (msg.contains("To")) {
-                        para = tokens[1];
+                        para = tokens[1].trim();
                         leidoelto = false;
                     }
                 }
@@ -44,14 +44,13 @@ public class Server2 implements Runnable {
                     String msg = in.readLine();
                     log.print(" " + msg);
                     if (msg != null) {
-                        msg.replaceAll("\\s+", "").split("/");
                         if (msg.contains("Name")) {
-                            String nombreArchivo = msg.split(":")[1];
+                            String nombreArchivo = msg.split(":")[1].trim();
                             msg = in.readLine();
                             log.print(" " + msg);
 
                             if (msg.contains("Size")) {
-                                String sizeArchivo = msg.split(":")[1];
+                                String sizeArchivo = msg.split(":")[1].trim();
                                 msg = in.readLine();
                                 log.print(" " + msg);
                                 String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(de).conQuien;
@@ -65,6 +64,7 @@ public class Server2 implements Runnable {
                                     outSocket.println(mensajeaenviar);
                                     outSocket.close();
                                     socketReenvio.close();
+                                    break;
                                 } else {
                                     int star = 1;
                                     int fin = archivo.size();
@@ -91,14 +91,15 @@ public class Server2 implements Runnable {
                                 }
                                 outSocket.close();
                                 socketReenvio.close();
+                                break;
                             } else if (msg.contains("Data")) {
-                                String data = msg.split(":")[1];
+                                String data = msg.split(":")[1].trim();
                                 msg = in.readLine();
                                 log.print(" " + msg);
-                                String frag = msg.split(":")[1];
+                                String frag = msg.split(":")[1].trim();
                                 msg = in.readLine();
                                 log.print(" " + msg);
-                                String size = msg.split(":")[1];
+                                String size = msg.split(":")[1].trim();
                                 msg = in.readLine();
                                 log.print(" " + msg);
                                 archivo.put(Integer.parseInt(frag), data);
@@ -119,6 +120,7 @@ public class Server2 implements Runnable {
                                     os.write(archivo);
                                     os.close();
                                     log.print("Archivo guardado : " + nombreArchivo);
+                                    break;
                                 }
                             }
                         } else if (msg.contains("Msg")) {
@@ -138,13 +140,13 @@ public class Server2 implements Runnable {
                     String msg = in.readLine();
                     log.print(" " + msg);
                     if (msg != null) {
-                        msg.replaceAll("\\s+", "").split("/");
+                        msg.replaceAll("\\s+", "");
                         if (msg.contains("Name:")) {
-                            String nombreArchivo = msg.split(":")[1];
+                            String nombreArchivo = msg.split(":")[1].trim();
                             msg = in.readLine();
                             log.print(" " + msg);
                             if (msg.contains("Size")) {
-                                String size = msg.split(":")[1];
+                                String size = msg.split(":")[1].trim();
                                 msg = in.readLine();
                                 log.print(" " + msg);
                                 String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(para).conQuien;
@@ -156,14 +158,15 @@ public class Server2 implements Runnable {
                                 out.println(mensajeenviar);
                                 out.close();
                                 conesocenviar.close();
+                                break;
                             } else {
-                                String dataArchivo = msg.split(":")[1];
+                                String dataArchivo = msg.split(":")[1].trim();
                                 msg = in.readLine();
                                 log.print(" " + msg);
-                                String fragArchivo = msg.split(":")[1];
+                                String fragArchivo = msg.split(":")[1].trim();
                                 msg = in.readLine();
                                 log.print(" " + msg);
-                                String sizeArchivo = msg.split(":")[1];
+                                String sizeArchivo = msg.split(":")[1].trim();
                                 msg = in.readLine();
                                 log.print(" " + msg);
                                 archivo.put(Integer.parseInt(fragArchivo), dataArchivo);
@@ -188,7 +191,7 @@ public class Server2 implements Runnable {
                                 }
                             }
                         } else if (msg.contains("Msg:")) {
-                            String error = msg.split(":")[1];
+                            String error = msg.split(":")[1].trim();
                             msg = in.readLine();
                             log.print(" " + msg);
                             String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(para).conQuien;
@@ -200,11 +203,14 @@ public class Server2 implements Runnable {
                             out.println(mensaje);
                             out.close();
                             conexionnuevocliente.close();
+                            break;
                         } else {
                             log.print(" El cliente " + de + " envio una peticion incorrecta");
+                            break;
                         }
                     } else {
                         log.print(" El cliente " + de + " mando null");
+                        break;
                     }
 
                 }

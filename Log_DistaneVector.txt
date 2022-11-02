@@ -1,16 +1,10 @@
-[lun, 31 oct. 2022 22:20:54 -0600]Adyacentes: {H={ip=192.168.1.39}}
-[lun, 31 oct. 2022 22:20:54 -0600]Destinos: [G, H]
-[lun, 31 oct. 2022 22:20:54 -0600]Hay cambios en los vectores de distancia. 
-[lun, 31 oct. 2022 22:20:54 -0600]DV: {G={G=G,0, H=H,20}}
-[lun, 31 oct. 2022 22:20:54 -0600]=============================
-[lun, 31 oct. 2022 22:20:54 -0600]  |     G      |     H      |
-[lun, 31 oct. 2022 22:20:54 -0600]=============================
-[lun, 31 oct. 2022 22:20:54 -0600]G |     0G     |     20H     |
-[lun, 31 oct. 2022 22:20:54 -0600]=============================
-[lun, 31 oct. 2022 22:20:57 -0600]Recalcular Distance Vector con rutas de H
-[lun, 31 oct. 2022 22:20:57 -0600]DV: {G={G=G,0, H=H,20}}
-[lun, 31 oct. 2022 22:20:57 -0600]=============================
-[lun, 31 oct. 2022 22:20:57 -0600]  |     G      |     H      |
-[lun, 31 oct. 2022 22:20:57 -0600]=============================
-[lun, 31 oct. 2022 22:20:57 -0600]G |     0G     |     20H     |
-[lun, 31 oct. 2022 22:20:57 -0600]=============================
+[mié, 2 nov 2022 12:59:22 -0600]Adyacentes: {G={ip=25.12.152.10}, J={ip=25.66.48.227}}
+[mié, 2 nov 2022 12:59:22 -0600]Destinos: [H, G, J]
+[mié, 2 nov 2022 12:59:22 -0600]Hay cambios en los vectores de distancia. 
+[mié, 2 nov 2022 12:59:22 -0600]DV: {H={G=G,20, H=H,0, J=J,10}}
+[mié, 2 nov 2022 12:59:23 -0600]Recalcular Distance Vector con rutas de G
+[mié, 2 nov 2022 12:59:23 -0600]DV: {H={G=G,20, H=H,0, J=J,10}}
+[mié, 2 nov 2022 12:59:42 -0600]Recalcular Distance Vector con rutas de J
+[mié, 2 nov 2022 12:59:42 -0600]DV: {H={G=J,12, H=H,0, J=J,10}}
+[mié, 2 nov 2022 12:59:43 -0600]Recalcular Distance Vector con rutas de G
+[mié, 2 nov 2022 12:59:43 -0600]DV: {H={G=J,12, H=H,0, J=J,10}}

@@ -30,7 +30,7 @@ public class mainTorrent {
     public static void main(String[] arg) throws Exception {
         Log log = new Log("./Log_DistaneVector.txt");
         String config = "configuracion.txt";
-        String inicialNodo = "G";
+        String inicialNodo = "H";
         DistanceVector dVector = new DistanceVector(config, inicialNodo, log);
         dVector.config();
 
@@ -69,16 +69,16 @@ public class mainTorrent {
             System.out.println(ANSI_YELLOW + "Ingrese Nombre de Archivo y Extensión: "+ ANSI_RESET);
             String archivo = input.nextLine();
             System.out.print(ANSI_YELLOW + "Ingrese tamaño de archivo (bytes): "+ ANSI_RESET);
-            String tamaño = input.nextLine();
+            String tamano = input.nextLine();
             System.out.println("");
-            System.out.println(ANSI_GREEN_BACKGROUND +"Solicitando "+ archivo + " de tamaño " + tamaño + " bytes a nodo " + nodo + ANSI_RESET );
+            System.out.println(ANSI_GREEN_BACKGROUND +"Solicitando "+ archivo + " de tamaño " + tamano + " bytes a nodo " + nodo + ANSI_RESET );
             System.out.println("Continuar? (y/n)");
             String descision = input.nextLine();
             if (descision.equals("y")) {
                 Socket smensaje = new Socket("localhost", 1981); //puerto del server de fowarding
                 PrintWriter env = new PrintWriter(smensaje.getOutputStream(), true);
                 String msj="";
-                msj = "From: " + inicialNodo + "\nTo: " + nodo + "\nName: " + archivo + "\nSize: " + tamaño + "\nEOF";
+                msj = "From: " + inicialNodo + "\nTo: " + nodo + "\nName: " + archivo + "\nSize: " + tamano + "\nEOF";
                 env.println(msj);
                 System.out.print(msj);
                 env.close();
