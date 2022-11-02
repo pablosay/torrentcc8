@@ -1,24 +1,16 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.*;
 import java.net.Socket;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 
 public class Server2 implements Runnable {
-    protected Socket socket;
-    protected DistanceVector dv;
-    protected Log log;
-    protected Integer puerto = 1981;
-    protected HashMap<Integer, String> archivo = new HashMap<Integer, String>();
-    protected Integer sizeArchivoLocal = 0;
-    protected String mensaje = "";
+    Socket socket;
+    DistanceVector dv;
+    Log log;
+    String mensaje = "";
+    Integer sizeArchivoLocal = 0;
+    Integer puerto = 1981;
+    HashMap<Integer, String> archivo = new HashMap<Integer, String>();
 
     public Server2(Socket socket, DistanceVector dv, Log log) {
         this.socket = socket;
@@ -28,282 +20,191 @@ public class Server2 implements Runnable {
 
     public void run() {
         try {
-            BufferedReader inSocket = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String de = "";
             String para = "";
             while (true) {
-                Boolean leerEncabezado = false;
-                while (!leerEncabezado) {
-                    String mensajeCliente = inSocket.readLine();
-                    if (mensajeCliente == null) {
+                boolean leidoelto = true;
+                while (leidoelto) {
+                    String msg = in.readLine();
+                    if (msg == null) {
                         break;
                     }
-                    this.log.print(" " + mensajeCliente);
-                    String[] tokens = mensajeCliente.split(":");
-                    if (mensajeCliente.contains("From:")) {
-                        de = tokens[1].trim();
-                        continue;
-                    } else if (mensajeCliente.contains("To")) {
-                        para = tokens[1].trim();
-                        leerEncabezado = true;
+                    log.print(" " + msg);
+                    msg.replaceAll("\\s+", "").split("/");
+                    String[] tokens = msg.split(":");
+                    if (msg.contains("From:")) {
+                        de = tokens[1];
+                    } else if (msg.contains("To")) {
+                        para = tokens[1];
+                        leidoelto = false;
                     }
                 }
-                // Saber si el mensaje viene para mi o es para reenviar
                 if (para.equals(dv.esteNodo)) {
-                    String mensajeCliente = inSocket.readLine();
-                    this.log.print(" " + mensajeCliente);
-                    if (mensajeCliente != null) {
-                        if (mensajeCliente.contains("Name:")) {
-                            // es una petcion o una respuesta
-                            String[] tokens = mensajeCliente.split(":");
-                            String nombreArchivo = tokens[1].trim();
-                            mensajeCliente = inSocket.readLine();
-                            this.log.print(" " + mensajeCliente);
+                    String msg = in.readLine();
+                    log.print(" " + msg);
+                    if (msg != null) {
+                        msg.replaceAll("\\s+", "").split("/");
+                        if (msg.contains("Name")) {
+                            String nombreArchivo = msg.split(":")[1];
+                            msg = in.readLine();
+                            log.print(" " + msg);
 
-                            if (mensajeCliente.contains("Size")) {
-                                // es una peticion
-                                tokens = mensajeCliente.split(":");
-                                String sizeArchivo = tokens[1].trim();
-                                mensajeCliente = inSocket.readLine();
-                                this.log.print(" " + mensajeCliente);
-                                // saber cual es la ruta minima a partir del Distance Vector para enviar el
-                                // mensaje
-                                String rutaMinima = this.dv.vectoresDeDistancia.get(this.dv.esteNodo).get(de).conQuien;
-                                this.log.print("Contestar peticion a " + de + " por medio de " + rutaMinima);
-                                String ipRutaMinima = this.dv.ipVecinos.get(rutaMinima).get("ip");
-                                // conectarse con el servidor para reenviar la informacion
-                                fragmenatarArchivo(nombreArchivo); // chunks del archivo (archivo)
-                                // abrir conexion con el destinatario
-                                Socket socketReenvio = new Socket(ipRutaMinima, this.puerto);
+                            if (msg.contains("Size")) {
+                                String sizeArchivo = msg.split(":")[1];
+                                msg = in.readLine();
+                                log.print(" " + msg);
+                                String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(de).conQuien;
+                                log.print("Contestar peticion a " + de + " por medio de " + ruta);
+                                String ip = dv.ipVecinos.get(ruta).get("ip");
+                                fragmenatarArchivo(nombreArchivo);
+                                Socket socketReenvio = new Socket(ip, puerto);
                                 PrintWriter outSocket = new PrintWriter(socketReenvio.getOutputStream(), true);
-                                if (this.mensaje != "") {
-                                    String mensaje = "";
-                                    mensaje = "From:" + dv.esteNodo;
-                                    mensaje += "\nTo:" + de;
-                                    mensaje += "\nMsg:" + this.mensaje;
-                                    mensaje += "\nEOF";
-                                    outSocket.println(mensaje);
+                                if (mensaje != "") {
+                                    String mensajeaenviar = "From:" + dv.esteNodo + "\nTo:" + de + "\nMsg:" + mensaje + "\nEOF";
+                                    outSocket.println(mensajeaenviar);
                                     outSocket.close();
                                     socketReenvio.close();
-                                    break;
-                                }
-                                // enviar archivos alternados
-                                Integer comienzo = 1;
-                                Integer finaal = archivo.size();
-                                boolean alternar = true;
-                                Integer j = 1;
-                                for (Integer i : archivo.keySet()) {
-                                    if (alternar) {
-                                        this.log.print("(" + j + ") Reenviar chunk " + i.toString() + " a " + de
-                                                + " por medio de " + rutaMinima);
-                                        String mensaje = "";
-                                        mensaje = "From:" + this.dv.esteNodo;
-                                        mensaje += "\nTo:" + de;
-                                        mensaje += "\nName:" + nombreArchivo;
-                                        mensaje += "\nData:" + this.archivo.get(comienzo);
-                                        mensaje += "\nFrag:" + comienzo.toString();
-                                        mensaje += "\nSize:" + sizeArchivo;
-                                        mensaje += "\nEOF";
-                                        outSocket.println(mensaje);
-                                        alternar = false;
-                                        comienzo++;
-                                    } else {
-                                        this.log.print("(" + j + ") Reenviar chunk " + i.toString() + " a " + de
-                                                + " por medio de " + rutaMinima);
-                                        String mensaje = "";
-                                        mensaje = "From:" + this.dv.esteNodo;
-                                        mensaje += "\nTo:" + de;
-                                        mensaje += "\nName:" + nombreArchivo;
-                                        mensaje += "\nData:" + this.archivo.get(finaal);
-                                        mensaje += "\nFrag:" + finaal.toString();
-                                        mensaje += "\nSize:" + sizeArchivo;
-                                        mensaje += "\nEOF";
-                                        outSocket.println(mensaje);
-                                        alternar = true;
-                                        finaal--;
+                                } else {
+                                    int star = 1;
+                                    int fin = archivo.size();
+                                    boolean alternar = true;
+                                    int j = 1;
+                                    for (int i : archivo.keySet()) {
+                                        if (alternar) {
+                                            log.print("(" + j + ") Reenviar chunk " + i + " a " + de + " por medio de " + ruta);
+                                            String mensajeaenviar = "";
+                                            mensajeaenviar = "From:" + dv.esteNodo +"\nTo:" + de +"\nName:" + nombreArchivo + "\nData:" + archivo.get(star)+ "\nFrag:" + star +"\nSize:" + sizeArchivo + "\nEOF";
+                                            outSocket.println(mensajeaenviar);
+                                            alternar = false;
+                                            star++;
+                                        } else {
+                                            log.print("(" + j + ") Reenviar chunk " + i + " a " + de + " por medio de " + ruta);
+                                            String mensajeaenviar = "";
+                                            mensajeaenviar = "From:" + dv.esteNodo + "\nTo:" + de + "\nName:" + nombreArchivo + "\nData:" + archivo.get(fin) + "\nFrag:" + fin +"\nSize:" + sizeArchivo + "\nEOF";
+                                            outSocket.println(mensajeaenviar);
+                                            alternar = true;
+                                            fin--;
+                                        }
+                                        j++;
                                     }
-                                    j++;
                                 }
-                                // cerrar conexion con el destinatario
                                 outSocket.close();
                                 socketReenvio.close();
-                                break;
-                            } else {
-                                // es una respuesta
-                                tokens = mensajeCliente.split(":");
-                                String dataArchivo = tokens[1].trim();
-                                // leer el numero de frag
-                                mensajeCliente = inSocket.readLine();
-                                this.log.print(" " + mensajeCliente);
-                                tokens = mensajeCliente.split(":");
-                                String fragArchivo = tokens[1].trim();
-                                // leer el size
-                                mensajeCliente = inSocket.readLine();
-                                this.log.print(" " + mensajeCliente);
-                                tokens = mensajeCliente.split(":");
-                                String sizeArchivo = tokens[1].trim();
-                                // leer eof
-                                mensajeCliente = inSocket.readLine();
-                                this.log.print(" " + mensajeCliente);
-                                // agregar el fragmento a mi temporal
-                                archivo.put(Integer.parseInt(fragArchivo), dataArchivo);
-                                // darle valor a sizeArchivoLocal
-                                sizeArchivoLocal += dataArchivo.length() / 2;
-                                if (sizeArchivoLocal >= Integer.parseInt(sizeArchivo)) {
-                                    this.log.print(archivo.size() + " chunks recibidos de archivo " + nombreArchivo
-                                            + " de " + de + " para mi ");
+                            } else if (msg.contains("Data")) {
+                                String data = msg.split(":")[1];
+                                msg = in.readLine();
+                                log.print(" " + msg);
+                                String frag = msg.split(":")[1];
+                                msg = in.readLine();
+                                log.print(" " + msg);
+                                String size = msg.split(":")[1];
+                                msg = in.readLine();
+                                log.print(" " + msg);
+                                archivo.put(Integer.parseInt(frag), data);
+                                sizeArchivoLocal += data.length() / 2;
+                                if (sizeArchivoLocal >= Integer.parseInt(size)) {
+                                    log.print(" Se han recibido los " + archivo.size() + " chunks del arvhivo "
+                                            + nombreArchivo + " enviados por " + de);
                                     String archivoStr = "";
                                     for (Integer i : archivo.keySet()) {
-                                        archivoStr = archivoStr + archivo.get(i); // obtener todos los chunks
+                                        archivoStr = archivoStr + archivo.get(i);
                                     }
-                                    // System.out.println("archivo : " + archivoStr);
                                     byte[] archivo = hexStringToByteArray(archivoStr);
 
-                                    Path path = Paths.get(nombreArchivo);
-                                    String file = path.getFileName().toString();
+                                    String guardar = Paths.get(nombreArchivo).getFileName().toString();
 
-                                    File archivoFile = new File("./Recibidos/" + file);
-                                    OutputStream os = new FileOutputStream(archivoFile);
+                                    File archivoaescribir = new File("./Recibidos/" + guardar);
+                                    OutputStream os = new FileOutputStream(archivoaescribir);
                                     os.write(archivo);
                                     os.close();
-                                    this.log.print("Archivo guardado : " + nombreArchivo);
-                                    break;
+                                    log.print("Archivo guardado : " + nombreArchivo);
                                 }
                             }
-                        } else if (mensajeCliente.contains("Msg:")) {
-                            // si es respuesta de error
-                            String[] tokens = mensajeCliente.split(":");
-                            String msg = tokens[1].trim();
-                            mensajeCliente = inSocket.readLine();
-                            this.log.print(" " + mensajeCliente);
-                            this.log.print("Ocurrion un error al recibir el archivo: " + msg);
+                        } else if (msg.contains("Msg")) {
+                            String[] tokens = msg.split(":");
+                            String msgdeerror = tokens[1];
+                            msg = in.readLine();
+                            log.print(" " + msg);
+                            log.print("Ocurrion un error al recibir el archivo: " + msgdeerror);
                             break;
                         } else {
                             log.print("El cliente " + de + " envio una peticion incorrecta");
-                            break;
                         }
                     } else {
                         log.print("El cliente " + de + " mando null");
-                        break;
                     }
                 } else {
-                    // Area del reenvio
-                    String mensajeCliente = inSocket.readLine();
-                    this.log.print(" " + mensajeCliente);
-                    if (mensajeCliente != null) {
-                        if (mensajeCliente.contains("Name:")) {
-                            // es una petcion o una respuesta
-                            String[] tokens = mensajeCliente.split(":");
-                            String nombreArchivo = tokens[1].trim();
-                            mensajeCliente = inSocket.readLine();
-                            this.log.print(" " + mensajeCliente);
-
-                            if (mensajeCliente.contains("Size")) {
-                                // es una peticion
-                                tokens = mensajeCliente.split(":");
-                                String tamanioArchivo = tokens[1].trim();
-                                mensajeCliente = inSocket.readLine();
-                                this.log.print(" " + mensajeCliente);
-                                // saber cual es la ruta minima a partir del Distance Vector para enviar el
-                                // mensaje
-                                String rutaMinima = this.dv.vectoresDeDistancia.get(this.dv.esteNodo)
-                                        .get(para).conQuien;
-                                System.out.println(this.dv.vectoresDeDistancia.toString());
-                                this.log.print("Reenviar peticion a " + para + " por medio de " + rutaMinima);
-                                String ipRutaMinima = this.dv.ipVecinos.get(rutaMinima).get("ip");
-                                // conectarse con el servidor para reenviar la informacion
-                                Socket socketReenvio = new Socket(ipRutaMinima, this.puerto);
-                                PrintWriter outSocket = new PrintWriter(socketReenvio.getOutputStream(), true);
-                                String mensaje = "";
-                                mensaje = "From:" + de;
-                                mensaje += "\nTo:" + para;
-                                mensaje += "\nName:" + nombreArchivo;
-                                mensaje += "\nSize:" + tamanioArchivo;
-                                mensaje += "\nEOF";
-                                outSocket.println(mensaje);
-                                outSocket.close();
-                                socketReenvio.close();
-                                break;
+                    String msg = in.readLine();
+                    log.print(" " + msg);
+                    if (msg != null) {
+                        msg.replaceAll("\\s+", "").split("/");
+                        if (msg.contains("Name:")) {
+                            String nombreArchivo = msg.split(":")[1];
+                            msg = in.readLine();
+                            log.print(" " + msg);
+                            if (msg.contains("Size")) {
+                                String size = msg.split(":")[1];
+                                msg = in.readLine();
+                                log.print(" " + msg);
+                                String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(para).conQuien;
+                                log.print("Reenviar peticion a " + para + " por medio de " + ruta);
+                                String ip = dv.ipVecinos.get(ruta).get("ip");
+                                Socket conesocenviar = new Socket(ip, puerto);
+                                PrintWriter out = new PrintWriter(conesocenviar.getOutputStream(), true);
+                                String mensajeenviar = "From:" + de + "\nTo:" + para + "\nName:" + nombreArchivo +"\nSize:" + size +"\nEOF";
+                                out.println(mensajeenviar);
+                                out.close();
+                                conesocenviar.close();
                             } else {
-                                // es una respuesta
-                                tokens = mensajeCliente.split(":");
-                                String dataArchivo = tokens[1].trim();
-                                // leer el numero de frag
-                                mensajeCliente = inSocket.readLine();
-                                this.log.print(" " + mensajeCliente);
-                                tokens = mensajeCliente.split(":");
-                                String fragArchivo = tokens[1].trim();
-                                // leer el size
-                                mensajeCliente = inSocket.readLine();
-                                this.log.print(" " + mensajeCliente);
-                                tokens = mensajeCliente.split(":");
-                                String sizeArchivo = tokens[1].trim();
-                                // leer eof
-                                mensajeCliente = inSocket.readLine();
-                                this.log.print(" " + mensajeCliente);
-                                // agregar el fragmento a mi temporal
+                                String dataArchivo = msg.split(":")[1];
+                                msg = in.readLine();
+                                log.print(" " + msg);
+                                String fragArchivo = msg.split(":")[1];
+                                msg = in.readLine();
+                                log.print(" " + msg);
+                                String sizeArchivo = msg.split(":")[1];
+                                msg = in.readLine();
+                                log.print(" " + msg);
                                 archivo.put(Integer.parseInt(fragArchivo), dataArchivo);
-                                // darle valor a sizeArchivoLocal
                                 sizeArchivoLocal += dataArchivo.length() / 2;
                                 if (sizeArchivoLocal >= Integer.parseInt(sizeArchivo)) {
-                                    String rutaMinima = this.dv.vectoresDeDistancia.get(this.dv.esteNodo)
-                                            .get(para).conQuien;
-                                    this.log.print("Reenviar archivo " + nombreArchivo + " de " + archivo.size()
-                                            + " chunks a " + para + " por medio de " + rutaMinima);
-                                    String ipRutaMinima = this.dv.ipVecinos.get(rutaMinima).get("ip");
-                                    Socket socketReenvio = new Socket(ipRutaMinima, this.puerto);
-                                    PrintWriter outSocket = new PrintWriter(socketReenvio.getOutputStream(), true);
-                                    Integer index = 1;
-                                    for (Integer fragmento : this.archivo.keySet()) {
-                                        this.log.print("(" + index + ") Reenviar chunk " + fragmento + " a " + para
-                                                + " por medio de " + rutaMinima);
+                                    String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(para).conQuien;
+                                    log.print("Reenviar archivo " + nombreArchivo + " de " + archivo.size() + " chunks a " + para + " por medio de " + ruta);
+                                    String ip = dv.ipVecinos.get(ruta).get("ip");
+                                    Socket conexionnuevocliente = new Socket(ip, puerto);
+                                    PrintWriter out = new PrintWriter(conexionnuevocliente.getOutputStream(), true);
+                                    int cont = 1;
+                                    for (Integer fragmento : archivo.keySet()) {
+                                        log.print("(" + cont + ") Reenviar chunk " + fragmento + " a " + para + " por medio de " + ruta);
                                         String mensaje = "";
-                                        mensaje = "From:" + de;
-                                        mensaje += "\nTo:" + para;
-                                        mensaje += "\nName:" + nombreArchivo;
-                                        mensaje += "\nData:" + this.archivo.get(fragmento);
-                                        mensaje += "\nFrag:" + fragmento;
-                                        mensaje += "\nSize:" + sizeArchivo;
-                                        mensaje += "\nEOF";
-                                        outSocket.println(mensaje);
-                                        index++;
+                                        mensaje = "From:" + de +"\nTo:" + para +"\nName:" + nombreArchivo +"\nData:" + archivo.get(fragmento) + "\nFrag:" + fragmento +"\nSize:" + sizeArchivo +"\nEOF";
+                                        out.println(mensaje);
+                                        cont++;
                                     }
-                                    outSocket.close();
-                                    socketReenvio.close();
+                                    out.close();
+                                    conexionnuevocliente.close();
                                     break;
                                 }
                             }
-                        } else if (mensajeCliente.contains("Msg:")) {
-                            // si es respuesta de error
-                            String[] tokens = mensajeCliente.split(":");
-                            String msg = tokens[1].trim();
-                            mensajeCliente = inSocket.readLine();
-                            this.log.print(" " + mensajeCliente);
-                            // saber cual es la ruta minima a partir del Distance Vector para enviar el
-                            // mensaje
-                            String rutaMinima = this.dv.vectoresDeDistancia.get(this.dv.esteNodo).get(para).conQuien;
-                            this.log.print(" Reenviar mensaje a " + para + " por medio de " + rutaMinima);
-                            String ipRutaMinima = this.dv.ipVecinos.get(rutaMinima).get("ip");
-                            /* Conectarme al servidor forward del vecino */
-                            Socket socketReenvio = new Socket(ipRutaMinima, this.puerto);
-                            PrintWriter outSocket = new PrintWriter(socketReenvio.getOutputStream(), true);
-                            /* Reenviar el mensaje que va para ese vecino */
-                            String mensaje = "";
-                            mensaje = "From:" + de;
-                            mensaje += "\nTo:" + para;
-                            mensaje += "\nMsg:" + msg;
-                            mensaje += "\nEOF";
-                            outSocket.println(mensaje);
-                            outSocket.close();
-                            socketReenvio.close();
-                            break;
+                        } else if (msg.contains("Msg:")) {
+                            String error = msg.split(":")[1];
+                            msg = in.readLine();
+                            log.print(" " + msg);
+                            String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(para).conQuien;
+                            log.print(" Reenviar mensaje a " + para + " por medio de " + ruta);
+                            String ip = dv.ipVecinos.get(ruta).get("ip");
+                            Socket conexionnuevocliente = new Socket(ip, puerto);
+                            PrintWriter out = new PrintWriter(conexionnuevocliente.getOutputStream(), true);
+                            String mensaje = "From:" + de +"\nTo:" + para + "\nMsg:" + error +"\nEOF";
+                            out.println(mensaje);
+                            out.close();
+                            conexionnuevocliente.close();
                         } else {
                             log.print(" El cliente " + de + " envio una peticion incorrecta");
-                            break;
                         }
                     } else {
                         log.print(" El cliente " + de + " mando null");
-                        break;
                     }
 
                 }
@@ -314,32 +215,34 @@ public class Server2 implements Runnable {
         }
     }
 
+    /* Preguntarle a Say, sobre el while principalmente el StringBuilder */
+
     public void fragmenatarArchivo(String nombreArchivo) {
         try {
-            File file = new File("./Enviados/" + nombreArchivo);
+            File file = new File("ArchivosEnviar/" + nombreArchivo);
+            InputStream archivoaenviar = new FileInputStream(file);
             byte[] arreglo = new byte[256];
-            int tamano = 0;
-            InputStream is = new FileInputStream(file);
-            this.archivo = new HashMap<Integer, String>();
-            int indiceChunk = 1;
-            while ((tamano = is.read(arreglo)) > 0) {
-                byte[] arregloAux = new byte[tamano];
-                for (int i = 0; i < tamano; i++) {
+            int largoaenviar = 0;
+            archivo = new HashMap<Integer, String>();
+            int cont = 1;
+            largoaenviar = archivoaenviar.read(arreglo);
+            while (largoaenviar > 0) {
+                byte[] arregloAux = new byte[largoaenviar];
+                for (int i = 0; i < largoaenviar; i++) {
                     arregloAux[i] = arreglo[i];
-                    // System.out.println(arregloAux[i]);
                 }
                 StringBuilder sb = new StringBuilder();
-                for (byte b : arregloAux) { // pasar los bytes a un string manejable
+                for (byte b : arregloAux) {
                     sb.append(String.format("%02x", b));
                 }
-                // System.out.println(sb.toString());
-                archivo.put(indiceChunk, sb.toString());
-                indiceChunk++;
+                archivo.put(cont, sb.toString());
+                cont++;
+                largoaenviar = archivoaenviar.read(arreglo);
             }
-            is.close();
+            archivoaenviar.close();
         } catch (Exception e) {
-            this.mensaje = "No se encontro el archivo solicitado";
-            this.archivo = new HashMap<>();
+            mensaje = "Favor enviar nombre de archivo correcto";
+            archivo = new HashMap<>();
         }
     }
 

@@ -10,11 +10,11 @@ public class Server implements Runnable {
 
     protected Socket socket;
     protected DistanceVector dv;
-    protected Integer reconexion;
+    protected int reconexion;
     protected Log log;
     protected String vecino;
 
-    public Server(Socket socket, DistanceVector dv, Integer reconexion, Log log) {
+    public Server(Socket socket, DistanceVector dv, int reconexion, Log log) {
         this.socket = socket;
         this.dv = dv;
         this.reconexion = reconexion;
@@ -50,8 +50,8 @@ public class Server implements Runnable {
                     } else if (type.contains("DV")) {
                         boolean leerDV = false;
                         HashMap<String, String> datos = new HashMap<String, String>();
-                        Integer len = 0;
-                        Integer locallen = 1;
+                        int len = 0;
+                        int locallen = 1;
                         while (!leerDV) {
                             mensajeCliente = inSocket.readLine();
                             this.log.print(" " + mensajeCliente);

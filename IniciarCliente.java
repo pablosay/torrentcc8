@@ -1,10 +1,10 @@
 public class IniciarCliente implements Runnable {
-    Integer retransmitir;
+    int retransmitir;
     Log log;
     DistanceVector dv;
-    Integer puerto = 9080;
+    int puerto = 9080;
 
-    public IniciarCliente(Integer retransmitir, Log log, DistanceVector dv) {
+    public IniciarCliente(int retransmitir, Log log, DistanceVector dv) {
         this.retransmitir = retransmitir;
         this.log = log;
         this.dv = dv;

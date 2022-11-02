@@ -14,18 +14,18 @@ public class mainTorrent {
 
         // servidor
         Log log1 = new Log("./Log_Servidor.txt");
-        Integer reconexion = 90;
+        int reconexion = 90;
         IniciarServidor servidorDistanceVector = new IniciarServidor(log1, reconexion, dv);
         new Thread(servidorDistanceVector).start();
 
         // clientes
         Log log2 = new Log("./Log_Cliente.txt");
-        Integer retransmitir = 20;
+        int retransmitir = 20;
         IniciarCliente clienteDistanceVector = new IniciarCliente(retransmitir, log2, dv);
         new Thread(clienteDistanceVector).start();
 
         // servidor forward
-        Integer forwadPuerto = 1981;
+        int forwadPuerto = 1981;
         Log log3 = new Log("./Log_Servidor_F.txt");
         IniciarServidorF servidorForward = new IniciarServidorF(log3, dv, forwadPuerto);
         new Thread(servidorForward).start();

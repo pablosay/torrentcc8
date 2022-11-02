@@ -4,12 +4,12 @@ import java.net.ServerSocket;
 
 public class IniciarServidor implements Runnable {
     Log log;
-    Integer puerto = 9080;
-    Integer reconexion;
+    int puerto = 9080;
+    int reconexion;
     ServerSocket socketServer;
     DistanceVector dv;
 
-    public IniciarServidor(Log log, Integer reconexion, DistanceVector dv) {
+    public IniciarServidor(Log log, int reconexion, DistanceVector dv) {
         this.log = log;
         this.reconexion = reconexion;
         this.dv = dv;
