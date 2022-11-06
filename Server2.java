@@ -7,10 +7,10 @@ public class Server2 implements Runnable {
     Socket socket;
     DistanceVector dv;
     Log log;
-    String mensaje = "";
+    boolean existe = true;
     Integer sizeArchivoLocal = 0;
     Integer puerto = 1981;
-    HashMap<Integer, String> archivo = new HashMap<Integer, String>();
+    LinkedList<String> ll = new LinkedList<String>();
 
     public Server2(Socket socket, DistanceVector dv, Log log) {
         this.socket = socket;
@@ -31,7 +31,7 @@ public class Server2 implements Runnable {
                         break;
                     }
                     log.print(" " + msg);
-                    String[] tokens = msg.split(":");
+                    String tokens[] = msg.split(":");
                     if (msg.contains("From:")) {
                         de = tokens[1].trim();
                         continue;
@@ -59,34 +59,18 @@ public class Server2 implements Runnable {
                                 fragmenatarArchivo(nombreArchivo);
                                 Socket socketReenvio = new Socket(ip, puerto);
                                 PrintWriter outSocket = new PrintWriter(socketReenvio.getOutputStream(), true);
-                                if (mensaje != "") {
-                                    String mensajeaenviar = "From:" + dv.esteNodo + "\nTo:" + de + "\nMsg:" + mensaje + "\nEOF";
+                                if (!existe) {
+                                    String mensajeaenviar = "From:" + dv.esteNodo + "\nTo:" + de + "\nMsg: Favor enviar nombre de archivo correcto \nEOF";
                                     outSocket.println(mensajeaenviar);
                                     outSocket.close();
                                     socketReenvio.close();
                                     break;
+                                    //si deciden alternar regresar a lo que se tenia
                                 } else {
-                                    int star = 1;
-                                    int fin = archivo.size();
-                                    boolean alternar = true;
-                                    int j = 1;
-                                    for (int i : archivo.keySet()) {
-                                        if (alternar) {
-                                            log.print("(" + j + ") Reenviar chunk " + i + " a " + de + " por medio de " + ruta);
-                                            String mensajeaenviar = "";
-                                            mensajeaenviar = "From:" + dv.esteNodo +"\nTo:" + de +"\nName:" + nombreArchivo + "\nData:" + archivo.get(star)+ "\nFrag:" + star +"\nSize:" + sizeArchivo + "\nEOF";
-                                            outSocket.println(mensajeaenviar);
-                                            alternar = false;
-                                            star++;
-                                        } else {
-                                            log.print("(" + j + ") Reenviar chunk " + i + " a " + de + " por medio de " + ruta);
-                                            String mensajeaenviar = "";
-                                            mensajeaenviar = "From:" + dv.esteNodo + "\nTo:" + de + "\nName:" + nombreArchivo + "\nData:" + archivo.get(fin) + "\nFrag:" + fin +"\nSize:" + sizeArchivo + "\nEOF";
-                                            outSocket.println(mensajeaenviar);
-                                            alternar = true;
-                                            fin--;
-                                        }
-                                        j++;
+                                    for (int i = 0; i < ll.size(); i++) {
+                                        log.print("(" + i+1 + ") Reenviar chunk " + i + " a " + de + " por medio de " + ruta);
+                                        String mensajeaenviar = "From:" + dv.esteNodo +"\nTo:" + de +"\nName:" + nombreArchivo + "\nData:" + ll.get(i)+ "\nFrag:" + i+1 +"\nSize:" + sizeArchivo + "\nEOF";
+                                        outSocket.println(mensajeaenviar);
                                     }
                                 }
                                 outSocket.close();
@@ -102,16 +86,15 @@ public class Server2 implements Runnable {
                                 String size = msg.split(":")[1].trim();
                                 msg = in.readLine();
                                 log.print(" " + msg);
-                                archivo.put(Integer.parseInt(frag), data);
+                                ll.add(data);
                                 sizeArchivoLocal += data.length() / 2;
                                 if (sizeArchivoLocal >= Integer.parseInt(size)) {
-                                    log.print(" Se han recibido los " + archivo.size() + " chunks del arvhivo "
-                                            + nombreArchivo + " enviados por " + de);
+                                    log.print(" Se han recibido los " + ll.size() + " chunks del arvhivo "+ nombreArchivo + " enviados por " + de);
                                     String archivoStr = "";
-                                    for (Integer i : archivo.keySet()) {
-                                        archivoStr = archivoStr + archivo.get(i);
+                                    for (int i = 0; i < ll.size(); i++) {
+                                        archivoStr += ll.get(i);
                                     }
-                                    byte[] archivo = hexStringToByteArray(archivoStr);
+                                    byte archivo[] = hexStringToByteArray(archivoStr);
 
                                     String guardar = Paths.get(nombreArchivo).getFileName().toString();
 
@@ -124,7 +107,7 @@ public class Server2 implements Runnable {
                                 }
                             }
                         } else if (msg.contains("Msg")) {
-                            String[] tokens = msg.split(":");
+                            String tokens[] = msg.split(":");
                             String msgdeerror = tokens[1];
                             msg = in.readLine();
                             log.print(" " + msg);
@@ -169,19 +152,20 @@ public class Server2 implements Runnable {
                                 String sizeArchivo = msg.split(":")[1].trim();
                                 msg = in.readLine();
                                 log.print(" " + msg);
-                                archivo.put(Integer.parseInt(fragArchivo), dataArchivo);
+                                ll.add(dataArchivo);
                                 sizeArchivoLocal += dataArchivo.length() / 2;
                                 if (sizeArchivoLocal >= Integer.parseInt(sizeArchivo)) {
                                     String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(para).conQuien;
-                                    log.print("Reenviar archivo " + nombreArchivo + " de " + archivo.size() + " chunks a " + para + " por medio de " + ruta);
+                                    log.print("Reenviar archivo " + nombreArchivo + " de " + ll.size() + " chunks a " + para + " por medio de " + ruta);
                                     String ip = dv.ipVecinos.get(ruta).get("ip");
                                     Socket conexionnuevocliente = new Socket(ip, puerto);
                                     PrintWriter out = new PrintWriter(conexionnuevocliente.getOutputStream(), true);
                                     int cont = 1;
-                                    for (Integer fragmento : archivo.keySet()) {
-                                        log.print("(" + cont + ") Reenviar chunk " + fragmento + " a " + para + " por medio de " + ruta);
+
+                                    for (int i = 0; i < ll.size(); i++) {
+                                        log.print("(" + cont + ") Reenviar chunk " + i + " a " + para + " por medio de " + ruta);
                                         String mensaje = "";
-                                        mensaje = "From:" + de +"\nTo:" + para +"\nName:" + nombreArchivo +"\nData:" + archivo.get(fragmento) + "\nFrag:" + fragmento +"\nSize:" + sizeArchivo +"\nEOF";
+                                        mensaje = "From:" + de +"\nTo:" + para +"\nName:" + nombreArchivo +"\nData:" + ll.get(i) + "\nFrag:" + i +"\nSize:" + sizeArchivo +"\nEOF";
                                         out.println(mensaje);
                                         cont++;
                                     }
@@ -221,40 +205,34 @@ public class Server2 implements Runnable {
         }
     }
 
-    /* Preguntarle a Say, sobre el while principalmente el StringBuilder */
-
     public void fragmenatarArchivo(String nombreArchivo) {
         try {
-            File file = new File("ArchivosEnviar/" + nombreArchivo);
-            InputStream archivoaenviar = new FileInputStream(file);
-            byte[] arreglo = new byte[256];
-            int largoaenviar = 0;
-            archivo = new HashMap<Integer, String>();
-            int cont = 1;
-            largoaenviar = archivoaenviar.read(arreglo);
-            while (largoaenviar > 0) {
-                byte[] arregloAux = new byte[largoaenviar];
-                for (int i = 0; i < largoaenviar; i++) {
-                    arregloAux[i] = arreglo[i];
+            InputStream archivoaenviar = new FileInputStream(new File("ArchivosEnviar/" + nombreArchivo));
+            byte almacen[] = new byte[256];
+            ll.clear();
+            int lel = archivoaenviar.read(almacen);
+            while (lel > 0) {
+                byte almacen2[] = new byte[lel];
+                for (int i = 0; i < lel; i++) {
+                    almacen2[i] = almacen[i];
                 }
-                StringBuilder sb = new StringBuilder();
-                for (byte b : arregloAux) {
-                    sb.append(String.format("%02x", b));
+                String s = "";
+                for (int i = 0; i < almacen2.length; i++) {
+                    s += String.format("%02x", almacen2[i]);
                 }
-                archivo.put(cont, sb.toString());
-                cont++;
-                largoaenviar = archivoaenviar.read(arreglo);
+                ll.add(s);
+                lel = archivoaenviar.read(almacen);
             }
             archivoaenviar.close();
         } catch (Exception e) {
-            mensaje = "Favor enviar nombre de archivo correcto";
-            archivo = new HashMap<>();
+            existe = false;
+            ll.clear();
         }
     }
 
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
-        byte[] data = new byte[len / 2];
+        byte data[] = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
                     + Character.digit(s.charAt(i + 1), 16));

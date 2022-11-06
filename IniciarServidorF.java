@@ -1,28 +1,26 @@
+import java.io.*;
 import java.net.*;
 
 public class IniciarServidorF implements Runnable {
     Log log;
     int puerto = 1981;
-    ServerSocket socket;
     DistanceVector dv;
+    
     public IniciarServidorF(Log log, DistanceVector dv, int puerto) {
         this.log = log;
         this.dv = dv;
         this.puerto = puerto;
     }
+
     public void run() {
         try {
-            log.print(" Servidor Envia del Puerto " + this.puerto);
-            socket = new ServerSocket(this.puerto);
+            log.print(" Servidor Envia del Puerto " + puerto);
+            ServerSocket socket = new ServerSocket(puerto);
             while (true) {
-                try {
-                    Server2 server = new Server2(this.socket.accept(), this.dv, this.log);
-                    new Thread(server).start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                Server2 server = new Server2(socket.accept(), dv, log);
+                new Thread(server).start();
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

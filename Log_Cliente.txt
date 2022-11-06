@@ -1,40 +1,17 @@
-[mié, 2 nov 2022 12:59:22 -0600] Primera conexion con G
-[mié, 2 nov 2022 12:59:22 -0600] Primera conexion con J
-[mié, 2 nov 2022 12:59:22 -0600] HELLO: G
-[mié, 2 nov 2022 12:59:22 -0600] HELLO: J
-[mié, 2 nov 2022 12:59:22 -0600] Servidor (G) From:G
-[mié, 2 nov 2022 12:59:22 -0600] Servidor (G) Type:WELCOME
-[mié, 2 nov 2022 12:59:22 -0600] DV enviado a G
-[mié, 2 nov 2022 12:59:22 -0600] Servidor (J) From:J
-[mié, 2 nov 2022 12:59:22 -0600] Servidor (J) Type:WELCOME
-[mié, 2 nov 2022 12:59:22 -0600] DV enviado a J
-[mié, 2 nov 2022 12:59:42 -0600] Cambios DV: true
-[mié, 2 nov 2022 12:59:42 -0600] Se envio el DVG
-[mié, 2 nov 2022 12:59:42 -0600] Cambios DV: true
-[mié, 2 nov 2022 12:59:42 -0600] Se envio el DVJ
-[mié, 2 nov 2022 13:00:02 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:00:02 -0600] Enviar KeepAlive a G
-[mié, 2 nov 2022 13:00:02 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:00:02 -0600] Enviar KeepAlive a J
-[mié, 2 nov 2022 13:00:22 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:00:22 -0600] Enviar KeepAlive a G
-[mié, 2 nov 2022 13:00:22 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:00:22 -0600] Enviar KeepAlive a J
-[mié, 2 nov 2022 13:00:42 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:00:42 -0600] Enviar KeepAlive a G
-[mié, 2 nov 2022 13:00:42 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:00:42 -0600] Enviar KeepAlive a J
-[mié, 2 nov 2022 13:01:02 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:01:02 -0600] Enviar KeepAlive a G
-[mié, 2 nov 2022 13:01:02 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:01:02 -0600] Enviar KeepAlive a J
-[mié, 2 nov 2022 13:01:22 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:01:22 -0600] Enviar KeepAlive a G
-[mié, 2 nov 2022 13:01:22 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:01:22 -0600] Enviar KeepAlive a J
-[mié, 2 nov 2022 13:01:42 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:01:42 -0600] Enviar KeepAlive a G
-[mié, 2 nov 2022 13:01:42 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:01:42 -0600] No se puede enviar informacion a (2) J
-[mié, 2 nov 2022 13:02:02 -0600] No hay cambios DV false
-[mié, 2 nov 2022 13:02:02 -0600] Enviar KeepAlive a G
+[dom, 6 nov 2022 17:38:33 -0600] Primera conexion con G
+[dom, 6 nov 2022 17:38:33 -0600] HELLO: G
+[dom, 6 nov 2022 17:38:33 -0600] Servidor (G) From:G
+[dom, 6 nov 2022 17:38:33 -0600] Servidor (G) Type:WELCOME
+[dom, 6 nov 2022 17:38:33 -0600] DV enviado a G
+[dom, 6 nov 2022 17:38:53 -0600] Cambios DV: true
+[dom, 6 nov 2022 17:38:53 -0600] Enviar KeepAlive a G
+[dom, 6 nov 2022 17:39:13 -0600] No hay cambios DV false
+[dom, 6 nov 2022 17:39:13 -0600] Enviar KeepAlive a G
+[dom, 6 nov 2022 17:39:33 -0600] No hay cambios DV false
+[dom, 6 nov 2022 17:39:33 -0600] Enviar KeepAlive a G
+[dom, 6 nov 2022 17:39:53 -0600] No hay cambios DV false
+[dom, 6 nov 2022 17:39:53 -0600] Enviar KeepAlive a G
+[dom, 6 nov 2022 17:40:13 -0600] No hay cambios DV false
+[dom, 6 nov 2022 17:40:13 -0600] Enviar KeepAlive a G
+[dom, 6 nov 2022 17:40:33 -0600] No hay cambios DV false
+[dom, 6 nov 2022 17:40:33 -0600] Enviar KeepAlive a G

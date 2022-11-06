@@ -58,7 +58,6 @@ public class mainTorrent {
         System.out.println(ANSI_GREEN + "| 19008451	Eduardo Navarro  |" + ANSI_RESET);
         System.out.println(ANSI_GREEN + "+--------------------------------+" + ANSI_RESET);
         // Hacer solicitud
-        String consola = "";
         while (true) {
             System.out.println(ANSI_YELLOW + "Ingrese Nodo: "+ ANSI_RESET);
             String nodo = input.nextLine();
