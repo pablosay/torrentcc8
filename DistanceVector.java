@@ -3,6 +3,7 @@ import java.io.*;
 import java.util.*;
 
 public class DistanceVector {
+
 	public String esteNodo;
 	public String archivoConfiguracion;
 	public Log log;
@@ -10,7 +11,7 @@ public class DistanceVector {
 	public HashMap<String, HashMap<String, InformacionVecino>> vectoresDeDistancia = new HashMap<String, HashMap<String, InformacionVecino>>();
 	public HashMap<String, HashMap<String, String>> ipVecinos = new HashMap<String, HashMap<String, String>>();
 	public HashMap<String, HashMap<String, InformacionVecino>> rutas = new HashMap<String, HashMap<String, InformacionVecino>>();
-	public LinkedList<String> nodos = new LinkedList<String>();
+	public LinkedList<String> nodosDeLaRed = new LinkedList<String>();
 
 	public HashMap<String, String> vecinosCosto = new HashMap<String, String>();
 	public Boolean cambiosDV = false;
@@ -65,13 +66,12 @@ public class DistanceVector {
 		reiniciar(true);
 		nuevaRuta(this.vecinosCosto, this.esteNodo);
 		this.cambiosDV = true;
-		log.print("Destinos: " + this.nodos);
-		log.print("Hay cambios en los vectores de distancia. ");
-		printDV();
+		log.print(" Vecinos (Adyacentes) : " + this.nodosDeLaRed);
+		print();
 	}
 
 	/**
-	 * Reiniciar, se reinicia
+	 * Reiniciar, se reinicia el distance vector
 	 * 
 	 * @param costosnodos    Costos Nodos y sus costos asignados
 	 * @param nodo           Nodo de este proyecto
@@ -80,8 +80,8 @@ public class DistanceVector {
 	public void reiniciar(Boolean inicializacion) {
 		HashMap<String, InformacionVecino> costos = new HashMap<String, InformacionVecino>();
 		InformacionVecino infovecino = new InformacionVecino(this.esteNodo, 0);
-		if (!this.nodos.contains(this.esteNodo)) {
-			this.nodos.add(this.esteNodo);
+		if (!this.nodosDeLaRed.contains(this.esteNodo)) {
+			this.nodosDeLaRed.add(this.esteNodo);
 		}
 
 		// Soy mi propio vecino
@@ -89,8 +89,8 @@ public class DistanceVector {
 
 		// Agregar ruta de los vecinos con sus costos
 		for (String nodo : this.vecinosCosto.keySet()) {
-			if (!this.nodos.contains(nodo)) {
-				this.nodos.add(nodo);
+			if (this.nodosDeLaRed.contains(nodo) == false) {
+				this.nodosDeLaRed.add(nodo);
 			}
 			infovecino = new InformacionVecino("", 0);
 			// Si el costo es 99 es porque esta desconectado
@@ -112,36 +112,43 @@ public class DistanceVector {
 		this.vectoresDeDistancia.put(this.esteNodo, costos);
 	}
 
-	public void nuevaRuta(HashMap<String, String> datos, String nuevoVecino) {
+	/**
+	 * Cuando se revisa los vecinos y sus costos que nos envian ,verificamos si hay
+	 * o no una mejor ruta para cada uno
+	 * 
+	 * @param datos
+	 * @param nuevoVecino
+	 */
+	public void nuevaRuta(HashMap<String, String> datos, String vecino) {
+		System.out.println(datos + "Datos recopilados de lo que mandaron");
 		HashMap<String, InformacionVecino> costos = new HashMap<String, InformacionVecino>();
 		InformacionVecino infovecino = new InformacionVecino(this.esteNodo, 0);
 
-		if (!this.nodos.contains(nuevoVecino)) {
-			this.nodos.add(nuevoVecino);
+		if (!this.nodosDeLaRed.contains(vecino)) {
+			this.nodosDeLaRed.add(vecino);
 		}
-		infovecino.conQuien = nuevoVecino;
+		infovecino.conQuien = vecino;
 		infovecino.costo = 0;
-		costos.put(nuevoVecino, infovecino);
+		costos.put(vecino, infovecino);
 
-		for (String vecino : datos.keySet()) {
-			if (!this.nodos.contains(vecino)) {
-				this.nodos.add(vecino);
+		for (String i : datos.keySet()) {
+			if (!this.nodosDeLaRed.contains(i)) {
+				this.nodosDeLaRed.add(i);
 			}
-			infovecino = new InformacionVecino(vecino, Integer.parseInt(datos.get(vecino)));
-			costos.put(vecino, infovecino);
+			infovecino = new InformacionVecino(i, Integer.parseInt(datos.get(i)));
+			costos.put(i, infovecino);
 		}
-		if (this.rutas.containsKey(nuevoVecino)) {
-			this.rutas.replace(nuevoVecino, costos);
+		if (this.rutas.containsKey(vecino)) {
+			this.rutas.replace(vecino, costos);
 		} else {
-			this.rutas.put(nuevoVecino, costos);
+			this.rutas.put(vecino, costos);
 		}
 
-		if (!this.esteNodo.contains(nuevoVecino)) {
-			if (this.rutas.get(this.esteNodo).get(nuevoVecino).costo == 99) {
-				int nuevoCosto = this.rutas.get(nuevoVecino).get(this.esteNodo).costo;
-				// this.rutas.get(this.esteNodo).get(nuevoVecino).replace("costo", nuevoCosto);
-				this.rutas.get(this.esteNodo).get(nuevoVecino).costo = nuevoCosto;
-				this.rutas.get(this.esteNodo).get(nuevoVecino).conQuien = nuevoVecino;
+		if (!this.esteNodo.contains(vecino)) {
+			if (this.rutas.get(this.esteNodo).get(vecino).costo == 99) {
+				int nuevoCosto = this.rutas.get(vecino).get(this.esteNodo).costo;
+				this.rutas.get(this.esteNodo).get(vecino).costo = nuevoCosto;
+				this.rutas.get(this.esteNodo).get(vecino).conQuien = vecino;
 			}
 		}
 	}
@@ -150,8 +157,8 @@ public class DistanceVector {
 	public void calcular(String vecino) {
 
 		String antesDePosibleCambio = this.vectoresDeDistancia.toString();
-		this.log.print("Recalcular Distance Vector con rutas de " + vecino);
-		for (String destino : nodos) {
+		this.log.print("Recalculando rutas: " + vecino);
+		for (String destino : nodosDeLaRed) {
 			InformacionVecino infovecino;
 			if (!this.vectoresDeDistancia.get(this.esteNodo).containsKey(destino)) {
 				infovecino = new InformacionVecino("", 99);
@@ -167,7 +174,12 @@ public class DistanceVector {
 				b = this.rutas.get(vecino).get(destino).costo;
 			}
 			// Total
-			int total = (a + b) > 99 ? 99 : (a + b);
+			int total = 0;
+			if ((a + b) > 99) {
+				total = 99;
+			} else {
+				total = a + b;
+			}
 			// Comparar el costo y actualizar si fuera necesario en el DV
 			int costoActual = this.vectoresDeDistancia.get(this.esteNodo).get(destino).costo;
 			if (total < costoActual) {
@@ -176,7 +188,7 @@ public class DistanceVector {
 			}
 		}
 		String despuesDePosibleCambio = this.vectoresDeDistancia.toString();
-		printDV();
+		print();
 		if (!antesDePosibleCambio.equals(despuesDePosibleCambio)) {
 			this.cambiosDV = true;
 			for (String vecinoinformado : this.informado.keySet()) {
@@ -186,8 +198,8 @@ public class DistanceVector {
 	}
 
 	/* Dibujar el Distance vector */
-	public void printDV() {
-		log.print("DV: " + this.vectoresDeDistancia.toString());
+	public void print() {
+		log.print(" DV: " + this.vectoresDeDistancia.toString());
 	}
 
 	/* Cuando se envia el distance vector a un vecino se actualiza a informado */

@@ -1,11 +1,8 @@
-public class IniciarCliente implements Runnable {
-    int reconectar;
+public class ClientManager implements Runnable {
     Log log;
     DistanceVector dVector;
-    int port = 9080;
 
-    public IniciarCliente(int reconectar, Log log, DistanceVector dVector) {
-        this.reconectar = reconectar;
+    public ClientManager(Log log, DistanceVector dVector) {
         this.log = log;
         this.dVector = dVector;
     }
@@ -15,8 +12,8 @@ public class IniciarCliente implements Runnable {
             for (String vecino : dVector.ipVecinos.keySet()) {
                 if (!dVector.servers.get(vecino)) {
                     String ip = this.dVector.ipVecinos.get(vecino).get("ip");
-                    this.log.print(" Primera conexion con " + vecino);
-                    Cliente cliente = new Cliente(ip, this.port, this.dVector, this.log, vecino, this.reconectar);
+                    this.log.print(" Conexion con: " + vecino);
+                    Cliente cliente = new Cliente(ip, 9080, this.dVector, this.log, vecino);
                     new Thread(cliente).start();
                 }
             }
@@ -26,8 +23,8 @@ public class IniciarCliente implements Runnable {
                 for (String vecino : dVector.ipVecinos.keySet()) {
                     if (dVector.clientes.get(vecino) && !dVector.servers.get(vecino)) {
                         String ip = this.dVector.ipVecinos.get(vecino).get("ip");
-                        this.log.print(" Reconexion con " + vecino);
-                        Cliente client = new Cliente(ip, this.port, this.dVector, this.log, vecino, this.reconectar);
+                        this.log.print(" Reconexion con: " + vecino);
+                        Cliente client = new Cliente(ip, 9080, this.dVector, this.log, vecino);
                         new Thread(client).start();
                     }
                 }

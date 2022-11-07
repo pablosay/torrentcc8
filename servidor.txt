@@ -1,0 +1,29 @@
+[dom, 6 nov. 2022 23:09:09 -0600]Servidor 9080
+[dom, 6 nov. 2022 23:09:11 -0600] From:H
+[dom, 6 nov. 2022 23:09:11 -0600] Type:HELLO
+[dom, 6 nov. 2022 23:09:11 -0600] From:H
+[dom, 6 nov. 2022 23:09:11 -0600] Type:DV
+[dom, 6 nov. 2022 23:09:11 -0600] Len:1
+[dom, 6 nov. 2022 23:09:11 -0600] G:20
+[dom, 6 nov. 2022 23:09:11 -0600] H envia el vector: {G=20}
+[dom, 6 nov. 2022 23:09:41 -0600] From:H
+[dom, 6 nov. 2022 23:09:41 -0600] Type:KeepAlive
+[dom, 6 nov. 2022 23:10:11 -0600] From:H
+[dom, 6 nov. 2022 23:10:11 -0600] Type:KeepAlive
+[dom, 6 nov. 2022 23:10:41 -0600] From:H
+[dom, 6 nov. 2022 23:10:41 -0600] Type:KeepAlive
+[dom, 6 nov. 2022 23:11:03 -0600] Se perdio conexion con H
+[dom, 6 nov. 2022 23:11:06 -0600] H perdio conexion
+[dom, 6 nov. 2022 23:11:26 -0600] From:H
+[dom, 6 nov. 2022 23:11:26 -0600] Type:HELLO
+[dom, 6 nov. 2022 23:11:26 -0600] From:H
+[dom, 6 nov. 2022 23:11:26 -0600] Type:DV
+[dom, 6 nov. 2022 23:11:26 -0600] Len:1
+[dom, 6 nov. 2022 23:11:26 -0600] G:20
+[dom, 6 nov. 2022 23:11:26 -0600] H envia el vector: {G=20}
+[dom, 6 nov. 2022 23:11:56 -0600] From:H
+[dom, 6 nov. 2022 23:11:56 -0600] Type:KeepAlive
+[dom, 6 nov. 2022 23:12:26 -0600] From:H
+[dom, 6 nov. 2022 23:12:26 -0600] Type:KeepAlive
+[dom, 6 nov. 2022 23:12:53 -0600] Se perdio conexion con H
+[dom, 6 nov. 2022 23:12:56 -0600] H perdio conexion

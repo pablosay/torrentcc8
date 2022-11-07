@@ -1,6 +1,0 @@
-[dom, 6 nov 2022 17:38:33 -0600]Adyacentes: {G={ip=25.12.152.10}}
-[dom, 6 nov 2022 17:38:33 -0600]Destinos: [H, G]
-[dom, 6 nov 2022 17:38:33 -0600]Hay cambios en los vectores de distancia. 
-[dom, 6 nov 2022 17:38:33 -0600]DV: {H={G=G,20, H=H,0}}
-[dom, 6 nov 2022 17:38:36 -0600]Recalcular Distance Vector con rutas de G
-[dom, 6 nov 2022 17:38:36 -0600]DV: {H={G=G,20, H=H,0}}

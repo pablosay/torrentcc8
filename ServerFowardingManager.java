@@ -1,12 +1,12 @@
 import java.io.*;
 import java.net.*;
 
-public class IniciarServidorF implements Runnable {
+public class ServerFowardingManager implements Runnable {
     Log log;
     int puerto = 1981;
     DistanceVector dv;
-    
-    public IniciarServidorF(Log log, DistanceVector dv, int puerto) {
+
+    public ServerFowardingManager(Log log, DistanceVector dv, int puerto) {
         this.log = log;
         this.dv = dv;
         this.puerto = puerto;

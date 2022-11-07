@@ -21,65 +21,64 @@ public class mainTorrent {
     public static final String ANSI_PURPLE_BACKGROUND = "\u001B[45m";
     public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
     public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
-    static void info(){
-        System.out.println( ANSI_YELLOW + "Input de Aplicación" + ANSI_RESET);
-        System.out.println(ANSI_BLUE + "Info de Servidores" +ANSI_RESET);
-        System.out.println(ANSI_WHITE+ "Info Fowarding Table" + ANSI_RESET);
+
+    static void info() {
+        System.out.println(ANSI_YELLOW + "Input de aplicacion" + ANSI_RESET);
+        System.out.println(ANSI_BLUE + "Info de Servidores" + ANSI_RESET);
+        System.out.println(ANSI_WHITE + "Info Fowarding Table" + ANSI_RESET);
         System.out.println(ANSI_PURPLE + "Info Routing" + ANSI_RESET);
-    }  
+    }
+
     public static void main(String[] arg) throws Exception {
-        Log log = new Log("./Log_DistaneVector.txt");
+        Log log = new Log("./dv.txt");
         String config = "configuracion.txt";
-        String inicialNodo = "H";
-        DistanceVector dVector = new DistanceVector(config, inicialNodo, log);
+        DistanceVector dVector = new DistanceVector(config, arg[0], log);
         dVector.config();
 
         // servidor
-        Log log1 = new Log("./Log_Servidor.txt");
-        int reconexion = 90;
-        IniciarServidor servidorDistanceVector = new IniciarServidor(log1, reconexion, dVector);
+        Log log1 = new Log("./servidor.txt");
+        ServerManager servidorDistanceVector = new ServerManager(log1, dVector);
         new Thread(servidorDistanceVector).start();
 
         // clientes
-        Log log2 = new Log("./Log_Cliente.txt");
-        int retransmitir = 20;
-        IniciarCliente clienteDistanceVector = new IniciarCliente(retransmitir, log2, dVector);
+        Log log2 = new Log("./cliente.txt");
+        ClientManager clienteDistanceVector = new ClientManager(log2, dVector);
         new Thread(clienteDistanceVector).start();
 
         // servidor forward
         int forwadPuerto = 1981;
-        Log log3 = new Log("./Log_Servidor_F.txt");
-        IniciarServidorF servidorForward = new IniciarServidorF(log3, dVector, forwadPuerto);
+        Log log3 = new Log("./servidorFowarding.txt");
+        ServerFowardingManager servidorForward = new ServerFowardingManager(log3, dVector, forwadPuerto);
         new Thread(servidorForward).start();
         Scanner input = new Scanner(System.in);
-        System.out.println(ANSI_GREEN + "+-------Proyecto Final CC8-------+" );
+        System.out.println(ANSI_GREEN + "+-------Proyecto Final CC8-------+");
         System.out.println(ANSI_GREEN + "| 19001434	Pablo Say        |" + ANSI_RESET);
         System.out.println(ANSI_GREEN + "| 19000243	Kevin De Mata    |" + ANSI_RESET);
         System.out.println(ANSI_GREEN + "| 19008451	Eduardo Navarro  |" + ANSI_RESET);
         System.out.println(ANSI_GREEN + "+--------------------------------+" + ANSI_RESET);
         // Hacer solicitud
         while (true) {
-            System.out.println(ANSI_YELLOW + "Ingrese Nodo: "+ ANSI_RESET);
+            System.out.println(ANSI_YELLOW + "Ingrese Nodo: " + ANSI_RESET);
             String nodo = input.nextLine();
             if (nodo.equals("EXIT")) {
-                System.out.println(ANSI_RED + "Desconectando..."+ ANSI_RESET); 
+                System.out.println(ANSI_RED + "Desconectando..." + ANSI_RESET);
                 break;
             }
-            System.out.println(ANSI_YELLOW + "Ingrese Nombre de Archivo y Extensión: "+ ANSI_RESET);
+            System.out.println(ANSI_YELLOW + "Ingrese nombre de archivo y extension: " + ANSI_RESET);
             String archivo = input.nextLine();
-            System.out.print(ANSI_YELLOW + "Ingrese tamaño de archivo (bytes): "+ ANSI_RESET);
+            System.out.println(ANSI_YELLOW + "Ingrese largo de archivo (bytes): " + ANSI_RESET);
             String tamano = input.nextLine();
             System.out.println("");
-            System.out.println(ANSI_GREEN_BACKGROUND +"Solicitando "+ archivo + " de tamaño " + tamano + " bytes a nodo " + nodo + ANSI_RESET );
+            System.out.println(ANSI_GREEN_BACKGROUND + "Solicitando " + archivo + " de largo " + tamano
+                    + " bytes a nodo " + nodo + ANSI_RESET);
             System.out.println("Continuar? (y/n)");
             String descision = input.nextLine();
             if (descision.equals("y")) {
-                Socket smensaje = new Socket("localhost", 1981); //puerto del server de fowarding
+                Socket smensaje = new Socket("localhost", 1981); // puerto del server de fowarding
                 PrintWriter env = new PrintWriter(smensaje.getOutputStream(), true);
-                String msj="";
-                msj = "From: " + inicialNodo + "\nTo: " + nodo + "\nName: " + archivo + "\nSize: " + tamano + "\nEOF";
+                String msj = "";
+                msj = "From: " + arg[0] + "\nTo: " + nodo + "\nName: " + archivo + "\nSize: " + tamano + "\nEOF";
                 env.println(msj);
-                System.out.print(msj);
                 env.close();
                 smensaje.close();
             }

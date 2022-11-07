@@ -1,0 +1,26 @@
+[dom, 6 nov. 2022 23:09:09 -0600] Conexion con: H
+[dom, 6 nov. 2022 23:09:09 -0600] No se logro conectar con H
+[dom, 6 nov. 2022 23:09:19 -0600] Reconexion con: H
+[dom, 6 nov. 2022 23:09:19 -0600] HELLO a: H
+[dom, 6 nov. 2022 23:09:19 -0600] Servidor responde: From:H
+Type:WELCOME
+[dom, 6 nov. 2022 23:09:19 -0600] DV enviado a H
+[dom, 6 nov. 2022 23:09:49 -0600] Cambios DV: true
+[dom, 6 nov. 2022 23:09:49 -0600] KeepAlive a H
+[dom, 6 nov. 2022 23:10:19 -0600] Cambio DVfalse
+[dom, 6 nov. 2022 23:10:19 -0600] KeepAlive a H
+[dom, 6 nov. 2022 23:10:49 -0600] Cambio DVfalse
+[dom, 6 nov. 2022 23:10:49 -0600] KeepAlive a H
+[dom, 6 nov. 2022 23:11:19 -0600] Cambios DV: true
+[dom, 6 nov. 2022 23:11:19 -0600] No se puede enviar informacion a (2) H
+[dom, 6 nov. 2022 23:11:29 -0600] Reconexion con: H
+[dom, 6 nov. 2022 23:11:29 -0600] HELLO a: H
+[dom, 6 nov. 2022 23:11:29 -0600] Servidor responde: From:H
+Type:WELCOME
+[dom, 6 nov. 2022 23:11:29 -0600] DV enviado a H
+[dom, 6 nov. 2022 23:11:59 -0600] Cambios DV: true
+[dom, 6 nov. 2022 23:11:59 -0600] KeepAlive a H
+[dom, 6 nov. 2022 23:12:29 -0600] Cambio DVfalse
+[dom, 6 nov. 2022 23:12:29 -0600] KeepAlive a H
+[dom, 6 nov. 2022 23:12:59 -0600] Cambios DV: true
+[dom, 6 nov. 2022 23:12:59 -0600] No se puede enviar informacion a (2) H

@@ -1,0 +1,11 @@
+[dom, 6 nov. 2022 23:09:09 -0600]Adyacentes: {H={ip=192.168.1.43}}
+[dom, 6 nov. 2022 23:09:09 -0600] Vecinos (Adyacentes) : [G, H]
+[dom, 6 nov. 2022 23:09:09 -0600] DV: {G={G=G,0, H=H,20}}
+[dom, 6 nov. 2022 23:09:11 -0600]Recalculando rutas: H
+[dom, 6 nov. 2022 23:09:11 -0600] DV: {G={G=G,0, H=H,20}}
+[dom, 6 nov. 2022 23:11:06 -0600]Inicio updateCostoVecino
+[dom, 6 nov. 2022 23:11:06 -0600]Fin updateCostoVecino
+[dom, 6 nov. 2022 23:11:26 -0600]Recalculando rutas: H
+[dom, 6 nov. 2022 23:11:26 -0600] DV: {G={G=G,0, H=H,20}}
+[dom, 6 nov. 2022 23:12:56 -0600]Inicio updateCostoVecino
+[dom, 6 nov. 2022 23:12:56 -0600]Fin updateCostoVecino

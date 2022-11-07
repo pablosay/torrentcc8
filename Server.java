@@ -2,106 +2,98 @@
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashMap;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 
 public class Server implements Runnable {
 
     protected Socket socket;
     protected DistanceVector dv;
-    protected int reconexion;
     protected Log log;
     protected String vecino;
 
-    public Server(Socket socket, DistanceVector dv, int reconexion, Log log) {
+    public Server(Socket socket, DistanceVector dv, Log log) {
         this.socket = socket;
         this.dv = dv;
-        this.reconexion = reconexion;
         this.log = log;
     }
 
     public void run() {
         try {
-            PrintWriter outSocket = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader inSocket = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            DataInputStream in = new DataInputStream(this.socket.getInputStream());
+            DataOutputStream out = new DataOutputStream(this.socket.getOutputStream());
             while (true) {
                 // Recibir mensaje del cliente
-                String mensajeCliente = inSocket.readLine();
-                if (mensajeCliente == null) {
+                try {
+                    String mensajeCliente = in.readUTF();
+                    // Imprimir mensaje del cliente al log
+                    String[] mensajeClienteTokenizado = mensajeCliente.split("\n");
+                    // Imprimir en el log el mensaje del cliente
+                    for (int i = 0; i < mensajeClienteTokenizado.length; i++) {
+                        this.log.print(" " + mensajeClienteTokenizado[i]);
+                    }
+                    // Obtener la letra del vecino que nos manda el mensaje
+                    String[] tokenDeMensajeFrom = mensajeClienteTokenizado[0].split(":");
+                    this.vecino = tokenDeMensajeFrom[1];
+                    System.out.println(this.vecino);
+                    // Si es de dos lineas es un HELLO o un keep alive
+                    if (mensajeClienteTokenizado.length == 2) {
+                        // Si manda un HELLO hay que devolverle un WELCOME
+                        if (mensajeClienteTokenizado[1].contains("HELLO")) {
+                            String test = "From:" + dv.esteNodo + "\n" + "Type:WELCOME";
+                            out.writeUTF(test);
+                            this.dv.updateclientes(this.vecino, true);
+                            // Si hay un keepAlive solo imprime
+                        } else if (mensajeClienteTokenizado[1].contains("KeepAlive")) {
+                        }
+                        // Si el largo del mensaje tokenizado es mayor a 2 significa que hay cambios en
+                        // los vectores de distancia.
+                    } else {
+                        // HashMap para agregar los datos de los vecinos y sus adyacentes
+                        HashMap<String, String> adyacentesDeVecinoYSusCostos = new HashMap<String, String>();
+                        // Recorremsos los vecinos del adyacente y los almacenamos
+                        for (int i = 3; i < mensajeClienteTokenizado.length; i++) {
+                            String[] tokensVecinoCosto = mensajeClienteTokenizado[i].split(":");
+                            String adyacente = tokensVecinoCosto[0];
+                            String costo = tokensVecinoCosto[1];
+                            adyacentesDeVecinoYSusCostos.put(adyacente, costo);
+                        }
+                        // Imprimos los vectores que nos enviaron
+                        this.log.print(
+                                " " + this.vecino + " envia el vector: "
+                                        + adyacentesDeVecinoYSusCostos.toString());
+                        // Agregar una nueva ruta
+                        dv.nuevaRuta(adyacentesDeVecinoYSusCostos, this.vecino);
+                        // Calculamos la distancia mas corta al vecino
+                        dv.calcular(this.vecino);
+                    }
+                } catch (Exception e) {
                     break;
                 }
-                // Imprimir mensaje del cliente al log
-                this.log.print("" + mensajeCliente);
-                // Verificar si tiene un From
-                if (mensajeCliente.contains("From:")) {
-                    String[] tokens = mensajeCliente.split(":");
-                    this.vecino = tokens[1];
-                    continue;
-                } else if (mensajeCliente.contains("Type")) {
-                    String[] tokens = mensajeCliente.split(":");
-                    String type = tokens[1];
-                    if (type.contains("HELLO")) {
-                        String test = "From:" + dv.esteNodo;
-                        test += "\n" + "Type:WELCOME";
-                        outSocket.println(test);
-                        /* Agregar al pool de clientes */
-                        this.dv.updateclientes(this.vecino, true);
-                    } else if (type.contains("DV")) {
-                        boolean leerDV = false;
-                        HashMap<String, String> datos = new HashMap<String, String>();
-                        int len = 0;
-                        int locallen = 1;
-                        while (!leerDV) {
-                            mensajeCliente = inSocket.readLine();
-                            this.log.print(" " + mensajeCliente);
-                            if (mensajeCliente.contains("Len")) {
-                                tokens = mensajeCliente.split(":");
-                                len = Integer.parseInt(tokens[1]);
-                            } else {
-                                tokens = mensajeCliente.split(":");
-                                datos.put(tokens[0], tokens[1]);
-                                if (locallen == len) {
-                                    leerDV = true;
-                                }
-                                locallen++;
-                            }
-                        }
-                        this.log.print(vecino + " envio -> " + datos);
-                        dv.nuevaRuta(datos, vecino); // agregar la nueva ruta, para despues calcular
-                        dv.calcular(vecino); // establecer los costos minimos nuevamente
-                    } else if (type.contains("KeepAlive")) {
-                        // No se hace nada en el keepalive, solo se hace print
-                        this.log.print("KeepAlive de " + this.vecino);
-                    }
-                    continue;
-                }
-            }
 
-            /* Si llega aqui se desconecto */
+            }
             this.log.print(" Se perdio conexion con " + this.vecino);
             this.dv.updateclientes(this.vecino, false);
             this.dv.updateinformado(this.vecino, true);
             while (true) {
-                Thread.sleep(this.reconexion * 1000);
+                // Esperamos 10s para volver a intentar reconectar
+                Thread.sleep(3000);
                 if (!this.dv.clientes.get(this.vecino)) {
-                    log.print(this.vecino + " ya no se conecto");
+                    log.print(" " + this.vecino + " perdio conexion");
                     this.dv.updateCostoVecino(this.vecino);
                     break;
                 } else {
-                    log.print(this.vecino + " se conecto de nuevo");
+                    log.print(" " + this.vecino + " se conecto de nuevo");
                     break;
                 }
             }
         } catch (SocketException e) {
-
             if (e.toString().contains("Connection reset")) {
-                /* Si entra a esta excepcion es por que se desconecto */
                 try {
                     this.dv.updateclientes(this.vecino, false);
                     this.dv.updateinformado(this.vecino, true);
                     while (true) {
-                        Thread.sleep(this.reconexion * 1000);
+                        Thread.sleep(3000);
                         if (!this.dv.clientes.get(this.vecino)) {
                             log.print(" " + this.vecino + " ya no se conecto");
                             this.dv.updateCostoVecino(this.vecino);
