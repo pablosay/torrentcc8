@@ -35,7 +35,6 @@ public class Server implements Runnable {
                     // Obtener la letra del vecino que nos manda el mensaje
                     String[] tokenDeMensajeFrom = mensajeClienteTokenizado[0].split(":");
                     this.vecino = tokenDeMensajeFrom[1];
-                    System.out.println(this.vecino);
                     // Si es de dos lineas es un HELLO o un keep alive
                     if (mensajeClienteTokenizado.length == 2) {
                         // Si manda un HELLO hay que devolverle un WELCOME

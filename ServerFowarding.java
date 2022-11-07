@@ -24,10 +24,16 @@ public class ServerFowarding implements Runnable {
             String receptorDelMensaje = "";
             String destinatarioDelMensaje = "";
             String peticionRespuestaError = "";
+            String mensajeDeOtroServidor = "";
             while (true) {
                 try {
                     // Obtener mensaje
-                    String mensajeDeOtroServidor = in.readUTF();
+                    try {
+                        mensajeDeOtroServidor = in.readUTF();
+                    } catch (EOFException e) {
+                        continue;
+                    }
+
                     // Separarlo por lineas
                     String[] mensajeSeparadoPorNuevaLinea = mensajeDeOtroServidor.split("\n");
                     // Si el largo
@@ -41,13 +47,13 @@ public class ServerFowarding implements Runnable {
                     // Si es peticion
                     if (peticionRespuestaError.equals("peticion")) {
                         // Obtener el receptor del mensaje
-                        receptorDelMensaje = mensajeSeparadoPorNuevaLinea[0].split(":")[1];
+                        receptorDelMensaje = mensajeSeparadoPorNuevaLinea[0].split(":")[1].trim();
                         // Obtener el destinatario
-                        destinatarioDelMensaje = mensajeSeparadoPorNuevaLinea[1].split(":")[1];
+                        destinatarioDelMensaje = mensajeSeparadoPorNuevaLinea[1].split(":")[1].trim();
                         // Nombre del archivo
-                        String nombreDelArchivo = mensajeSeparadoPorNuevaLinea[2].split(":")[1];
+                        String nombreDelArchivo = mensajeSeparadoPorNuevaLinea[2].split(":")[1].trim();
                         // Largo del archivo
-                        String largoDelArchivo = mensajeSeparadoPorNuevaLinea[3].split(":")[1];
+                        String largoDelArchivo = mensajeSeparadoPorNuevaLinea[3].split(":")[1].trim();
                         // Si es para este nodo solo contestamos la peticion
                         if (destinatarioDelMensaje.equals(dv.esteNodo)) {
                             String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(receptorDelMensaje).conQuien;
@@ -56,7 +62,7 @@ public class ServerFowarding implements Runnable {
                             fragmenatarArchivo(nombreDelArchivo);
                             Socket socketEnvioArchivo = new Socket(ip, puerto);
                             DataOutputStream out = new DataOutputStream(socketEnvioArchivo.getOutputStream());
-                            if (!existe) { // Revisar mensaje de error
+                            if (!existe) { // Revisar si existe el archivo
                                 String mensajeaenviar = "From:" + dv.esteNodo + "\nTo:" + receptorDelMensaje
                                         + "\nMsg: Favor enviar nombre de archivo correcto \nEOF";
                                 out.writeUTF(mensajeaenviar);
@@ -96,14 +102,17 @@ public class ServerFowarding implements Runnable {
                         }
                         // Si son datos
                     } else if (peticionRespuestaError.equals("datos")) {
-                        // Si los datos son para este nodo se guardan los archivos
+                        // Obtener el receptor del mensaje
+                        receptorDelMensaje = mensajeSeparadoPorNuevaLinea[0].split(":")[1].trim();
+                        // Obtener el destinatario
+                        destinatarioDelMensaje = mensajeSeparadoPorNuevaLinea[1].split(":")[1].trim();
                         if (destinatarioDelMensaje.equals(dv.esteNodo)) {
                             // Nombre del archivo
-                            String nombreDelArchivo = mensajeSeparadoPorNuevaLinea[2].split(":")[1];
+                            String nombreDelArchivo = mensajeSeparadoPorNuevaLinea[2].split(":")[1].trim();
                             // Datos del archivo
-                            String datosDelArchivo = mensajeSeparadoPorNuevaLinea[3].split(":")[1];
+                            String datosDelArchivo = mensajeSeparadoPorNuevaLinea[3].split(":")[1].trim();
                             // Largo del archivo
-                            String largoDelArchivo = mensajeSeparadoPorNuevaLinea[4].split(":")[1];
+                            String largoDelArchivo = mensajeSeparadoPorNuevaLinea[5].split(":")[1].trim();
                             // Agregar los datos
                             hexDelArchivo.add(datosDelArchivo);
                             // Se va incrementando el largo del archivo
@@ -129,11 +138,11 @@ public class ServerFowarding implements Runnable {
                             // Si los archivos no son para este nodo reenviamos los datos
                         } else {
                             // Nombre del archivo
-                            String nombreDelArchivo = mensajeSeparadoPorNuevaLinea[2].split(":")[1];
+                            String nombreDelArchivo = mensajeSeparadoPorNuevaLinea[2].split(":")[1].trim();
                             // Datos del archivo
-                            String datosDelArchivo = mensajeSeparadoPorNuevaLinea[3].split(":")[1];
+                            String datosDelArchivo = mensajeSeparadoPorNuevaLinea[3].split(":")[1].trim();
                             // Largo del archivo
-                            String largoDelArchivo = mensajeSeparadoPorNuevaLinea[4].split(":")[1];
+                            String largoDelArchivo = mensajeSeparadoPorNuevaLinea[5].split(":")[1].trim();
                             hexDelArchivo.add(datosDelArchivo);
                             sizeArchivoLocal += datosDelArchivo.length() / 2;
                             if (sizeArchivoLocal >= Integer.parseInt(largoDelArchivo)) {
@@ -162,9 +171,13 @@ public class ServerFowarding implements Runnable {
                         }
 
                     } else if (peticionRespuestaError.equals("error")) {
+                        // Obtener el receptor del mensaje
+                        receptorDelMensaje = mensajeSeparadoPorNuevaLinea[0].split(":")[1].trim();
+                        // Obtener el destinatario
+                        destinatarioDelMensaje = mensajeSeparadoPorNuevaLinea[1].split(":")[1].trim();
                         // Ver si el error es para este nodo
                         if (destinatarioDelMensaje.equals(dv.esteNodo)) {
-                            String mensajeError = mensajeSeparadoPorNuevaLinea[2].split(":")[1];
+                            String mensajeError = mensajeSeparadoPorNuevaLinea[2].split(":")[1].trim();
                             log.print("Ocurrio un error al recibir el archivo: " + mensajeError);
                             break;
                             // Si no es para este nodo lo reenvia
@@ -174,7 +187,7 @@ public class ServerFowarding implements Runnable {
                             String ip = dv.ipVecinos.get(ruta).get("ip");
                             Socket socketRenvioError = new Socket(ip, puerto);
                             DataOutputStream out = new DataOutputStream(socketRenvioError.getOutputStream());
-                            String mensajeError = mensajeSeparadoPorNuevaLinea[2].split(":")[1];
+                            String mensajeError = mensajeSeparadoPorNuevaLinea[2].split(":")[1].trim();
                             String mensaje = "From:" + receptorDelMensaje + "\nTo:" + destinatarioDelMensaje + "\nMsg:"
                                     + mensajeError + "\nEOF";
                             out.writeUTF(mensaje);
@@ -187,7 +200,7 @@ public class ServerFowarding implements Runnable {
                         break;
                     }
                 } catch (Exception e) {
-                    log.print(" Error de conexion con el nodo");
+                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {

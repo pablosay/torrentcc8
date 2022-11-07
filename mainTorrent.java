@@ -1,6 +1,7 @@
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.io.DataOutputStream;;
 
 public class mainTorrent {
     public static final String ANSI_BLACK = "\u001B[30m";
@@ -74,12 +75,10 @@ public class mainTorrent {
             System.out.println("Continuar? (y/n)");
             String descision = input.nextLine();
             if (descision.equals("y")) {
-                Socket smensaje = new Socket("localhost", 1981); // puerto del server de fowarding
-                PrintWriter env = new PrintWriter(smensaje.getOutputStream(), true);
-                String msj = "";
-                msj = "From: " + arg[0] + "\nTo: " + nodo + "\nName: " + archivo + "\nSize: " + tamano + "\nEOF";
-                env.println(msj);
-                env.close();
+                Socket smensaje = new Socket("127.0.0.1", 1981); // puerto del server de fowarding
+                DataOutputStream out = new DataOutputStream(smensaje.getOutputStream());
+                String msj = "From: " + arg[0] + "\nTo: " + nodo + "\nName: " + archivo + "\nSize: " + tamano + "\nEOF";
+                out.writeUTF(msj);
                 smensaje.close();
             }
             System.out.println("");

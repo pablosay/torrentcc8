@@ -61,7 +61,6 @@ public class DistanceVector {
 		} catch (Exception e) {
 			System.out.println("Error al iniciar la configuracion del servidor, DistanceVector.java, configurar");
 		}
-		System.out.println(ipVecinos.toString());
 		log.print("Adyacentes: " + this.ipVecinos);
 		reiniciar(true);
 		nuevaRuta(this.vecinosCosto, this.esteNodo);
@@ -120,7 +119,6 @@ public class DistanceVector {
 	 * @param nuevoVecino
 	 */
 	public void nuevaRuta(HashMap<String, String> datos, String vecino) {
-		System.out.println(datos + "Datos recopilados de lo que mandaron");
 		HashMap<String, InformacionVecino> costos = new HashMap<String, InformacionVecino>();
 		InformacionVecino infovecino = new InformacionVecino(this.esteNodo, 0);
 
