@@ -17,7 +17,7 @@ public class ServerFowardingManager implements Runnable {
             log.print(" Servidor Envia del Puerto " + puerto);
             ServerSocket socket = new ServerSocket(puerto);
             while (true) {
-                Server2 server = new Server2(socket.accept(), dv, log);
+                ServerFowarding server = new ServerFowarding(socket.accept(), dv, log);
                 new Thread(server).start();
             }
         } catch (IOException e) {
