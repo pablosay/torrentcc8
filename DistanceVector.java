@@ -9,13 +9,14 @@ public class DistanceVector {
 	public Log log;
 
 	public HashMap<String, HashMap<String, InformacionVecino>> vectoresDeDistancia = new HashMap<String, HashMap<String, InformacionVecino>>();
+	// Aqui quiza podas reemplazar Hashmap<String, Hashmap<String,String> por
+	// Hashmap<String,String>
 	public HashMap<String, HashMap<String, String>> ipVecinos = new HashMap<String, HashMap<String, String>>();
 	public HashMap<String, HashMap<String, InformacionVecino>> rutas = new HashMap<String, HashMap<String, InformacionVecino>>();
 	public LinkedList<String> nodosDeLaRed = new LinkedList<String>();
-
 	public HashMap<String, String> vecinosCosto = new HashMap<String, String>();
 	public Boolean cambiosDV = false;
-
+	// Meterlos en una clase
 	public HashMap<String, Boolean> informado = new HashMap<String, Boolean>();
 	public HashMap<String, Boolean> servers = new HashMap<String, Boolean>();
 	public HashMap<String, Boolean> clientes = new HashMap<String, Boolean>();
@@ -202,9 +203,6 @@ public class DistanceVector {
 
 	/* Cuando se envia el distance vector a un vecino se actualiza a informado */
 	public void updateinformado(String vecino, Boolean notificado) {
-		if (this.informado.containsKey(vecino)) {
-			this.informado.replace(vecino, notificado);
-		}
 		this.informado.put(vecino, notificado);
 	}
 
@@ -219,9 +217,6 @@ public class DistanceVector {
 
 	/* Cuando me conecto a un servidor */
 	public void updateservers(String vecino, Boolean escuchando) {
-		if (this.servers.containsKey(vecino)) {
-			this.servers.replace(vecino, escuchando);
-		}
 		this.servers.put(vecino, escuchando);
 	}
 
