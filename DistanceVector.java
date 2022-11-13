@@ -6,18 +6,21 @@ public class DistanceVector {
 	public String esteNodo;
 	public String archivoConfiguracion;
 	public Log log;
-
+	// Vectores de distancia del programa
 	public HashMap<String, HashMap<String, InformacionVecino>> vectoresDeDistancia = new HashMap<String, HashMap<String, InformacionVecino>>();
-	// Aqui quiza podas reemplazar Hashmap<String, Hashmap<String,String> por
-	// Hashmap<String,String>
-	public HashMap<String, HashMap<String, String>> ipVecinos = new HashMap<String, HashMap<String, String>>();
+	// Nodo , IP
+	public HashMap<String, String> ipVecinos = new HashMap<String, String>();
+	// Rutas para fowarding
 	public HashMap<String, HashMap<String, InformacionVecino>> rutas = new HashMap<String, HashMap<String, InformacionVecino>>();
+	// Nodos de la red
 	public LinkedList<String> nodosDeLaRed = new LinkedList<String>();
+	// Nodos vecinos con sus costos
 	public HashMap<String, String> vecinosCosto = new HashMap<String, String>();
-	
-	public Boolean cambiosDV = false;
-
+	// Verificacion si hay cambios en los vectores de distancia
+	public Boolean cambio = false;
+	// Informacion de estado de los servidores, clientes, nodos informados
 	Informacion info = new Informacion();
+
 	/**
 	 * 
 	 * @param archivoConfiguracion Archivo para el log
@@ -35,6 +38,7 @@ public class DistanceVector {
 	 */
 	public void config() {
 		try {
+			// Leemos el archivo de configuracion
 			File archivo = new File(this.archivoConfiguracion);
 			FileReader filereader = new FileReader(archivo);
 			BufferedReader bufferreader = new BufferedReader(filereader);
@@ -48,22 +52,25 @@ public class DistanceVector {
 				String ip = token[2];
 				// Ingresar su nodo y los costos
 				vecinosCosto.put(nodo, costo);
-				HashMap<String, String> ipNumero = new HashMap<String, String>();
-				// Ingresar las IP con sus numeros de IP
-				ipNumero.put("ip", ip);
 				// Ingresar el nodo con su IP.
-				ipVecinos.put(nodo, ipNumero);
-				// Nodo (H) -> (G, ipNumero - > ("ip", 127.0.0.1))
+				ipVecinos.put(nodo, ip);
 			}
 			bufferreader.close();
 		} catch (Exception e) {
 			System.out.println("Error al iniciar la configuracion del servidor, DistanceVector.java, configurar");
 		}
+		// Imprimimos los adyacentes que encontremos
 		log.print("Adyacentes: " + this.ipVecinos);
+		// Reiniciamos el distance vector, le damos true porque viene de la
+		// inicializacion
 		reiniciar(true);
+		// Agregamos las rutas que encontramos
 		nuevaRuta(this.vecinosCosto, this.esteNodo);
-		this.cambiosDV = true;
+		// Si hubieron cambios
+		this.cambio = true;
+		// Nodos de la red
 		log.print(" Vecinos (Adyacentes) : " + this.nodosDeLaRed);
+		// Imprimir el distance vector
 		print();
 	}
 
@@ -75,8 +82,11 @@ public class DistanceVector {
 	 * @param inicializacion Verificar si ya se inicializo
 	 */
 	public void reiniciar(Boolean inicializacion) {
+		// Vamos a obtener los costos
 		HashMap<String, InformacionVecino> costos = new HashMap<String, InformacionVecino>();
+		// Con quien debe ir y el costo
 		InformacionVecino infovecino = new InformacionVecino(this.esteNodo, 0);
+		// Si no esta contenido el propio nodo lo agregamos
 		if (!this.nodosDeLaRed.contains(this.esteNodo)) {
 			this.nodosDeLaRed.add(this.esteNodo);
 		}
@@ -106,6 +116,7 @@ public class DistanceVector {
 				this.info.ServePut(nodo);
 			}
 		}
+		// Agregamos al dv los nuevos valores
 		this.vectoresDeDistancia.put(this.esteNodo, costos);
 	}
 
@@ -117,33 +128,39 @@ public class DistanceVector {
 	 * @param nuevoVecino
 	 */
 	public void nuevaRuta(HashMap<String, String> datos, String vecino) {
+		// Nodos con la informacion de quien debe ir y sus costos
 		HashMap<String, InformacionVecino> costos = new HashMap<String, InformacionVecino>();
 		InformacionVecino infovecino = new InformacionVecino(this.esteNodo, 0);
-
+		// Si no esta este nodo se agrega a los nodos de la red
 		if (!this.nodosDeLaRed.contains(vecino)) {
 			this.nodosDeLaRed.add(vecino);
 		}
+		// Agregamos la informacion de este nodo
 		infovecino.conQuien = vecino;
 		infovecino.costo = 0;
 		costos.put(vecino, infovecino);
 
+		// Ver si hay un nuevo nodo y lo agregamos
 		for (String i : datos.keySet()) {
 			if (!this.nodosDeLaRed.contains(i)) {
 				this.nodosDeLaRed.add(i);
 			}
+			// actualizamos la informacion de los vecinos
 			infovecino = new InformacionVecino(i, Integer.parseInt(datos.get(i)));
 			costos.put(i, infovecino);
 		}
-		if (this.rutas.containsKey(vecino)) {
-			this.rutas.replace(vecino, costos);
-		} else {
-			this.rutas.put(vecino, costos);
-		}
+
+		// Si no esta el vecino se agrega y si se encuentra se reemplaza el valor
+		this.rutas.put(vecino, costos);
 
 		if (!this.esteNodo.contains(vecino)) {
+			// Si el nodo es unreachable
 			if (this.rutas.get(this.esteNodo).get(vecino).costo == 99) {
+				// Ya le podemos cambiar su costo
 				int nuevoCosto = this.rutas.get(vecino).get(this.esteNodo).costo;
+				// Nuevo costo
 				this.rutas.get(this.esteNodo).get(vecino).costo = nuevoCosto;
+				// Con este vecino
 				this.rutas.get(this.esteNodo).get(vecino).conQuien = vecino;
 			}
 		}
@@ -151,16 +168,20 @@ public class DistanceVector {
 
 	/* Estimar las rutas minimas para ir a un nodo de la red */
 	public void calcular(String vecino) {
-
+		// Verificar si hubieron cambios en los vectores de distancia
 		String antesDePosibleCambio = this.vectoresDeDistancia.toString();
+		// Recalculando ruta
 		this.log.print("Recalculando rutas: " + vecino);
 		for (String destino : nodosDeLaRed) {
 			InformacionVecino infovecino;
+			// Si el nodo no es vecino
 			if (!this.vectoresDeDistancia.get(this.esteNodo).containsKey(destino)) {
+				// Agregamos el costo de 99
 				infovecino = new InformacionVecino("", 99);
 				this.vectoresDeDistancia.get(this.esteNodo).put(destino, infovecino);
 			}
-			/* Algoritmo de Bellman-Ford */
+			// Si no es ejecutamos el
+			// Algoritmo de Bellman-Ford
 			int a = 99;
 			if (this.rutas.get(this.esteNodo).containsKey(vecino)) {
 				a = this.rutas.get(this.esteNodo).get(vecino).costo;
@@ -185,36 +206,22 @@ public class DistanceVector {
 		}
 		String despuesDePosibleCambio = this.vectoresDeDistancia.toString();
 		print();
+		// Si hubi cambios
 		if (!antesDePosibleCambio.equals(despuesDePosibleCambio)) {
-			this.cambiosDV = true;
+			this.cambio = true;
 			for (String vecinoinformado : this.info.informado.keySet()) {
+				// No se les ha enviado los nuevos distance vector
 				this.info.informado.replace(vecinoinformado, false);
 			}
+		} else {
+			this.log.print(" No hubieron cambios en de vectores de distancia ");
+			print();
 		}
 	}
 
-	/* Dibujar el Distance vector */
+	// Imprimir en el log el distance vector
 	public void print() {
 		log.print(" DV: " + this.vectoresDeDistancia.toString());
-	}
-
-	/* Cuando se envia el distance vector a un vecino se actualiza a informado */ 
-	public void updateinformado(String vecino, Boolean notificado) {
-		this.info.informado.put(vecino, notificado);
-	}
-
-	/* Cuando un cliente se conecto al servidor del distance vector */  /* ✔ */
-	public void updateclientes(String vecino, Boolean conectado) {
-		if (this.info.clientes.containsKey(vecino)) {
-			this.info.clientes.replace(vecino, conectado);
-		} else {
-			this.info.clientes.put(vecino, conectado);
-		}
-	}
-
-	/* Cuando me conecto a un servidor */
-	public void updateservers(String vecino, Boolean escuchando) {
-		this.info.servers.put(vecino, escuchando);
 	}
 
 	/*
@@ -222,14 +229,17 @@ public class DistanceVector {
 	 * pone un costo de 99
 	 */
 	public void updateCostoVecino(String vecino) {
+		// Costo para unreachable
 		String costo = "99";
+		// Datos del vecino
 		HashMap<String, String> datos = new HashMap<String, String>();
-		this.log.print("Inicio updateCostoVecino");
 		for (String vecinoi : this.rutas.get(this.esteNodo).keySet()) {
 			if (!this.esteNodo.contains(vecinoi)) {
 				if (vecinoi.equals(vecino)) {
+					// Unreachable
 					datos.put(vecinoi, costo);
 				} else {
+					// Costo original
 					String costooriginal = String.valueOf(this.rutas.get(this.esteNodo).get(vecinoi).costo);
 					datos.put(vecinoi, costooriginal);
 				}
@@ -237,10 +247,13 @@ public class DistanceVector {
 		}
 		this.reiniciar(false);
 		this.nuevaRuta(datos, this.esteNodo);
-		this.cambiosDV = true;
+		// Hay cambio en el distance vector
+		this.cambio = true;
+		// No se les han informado a los vecinos de nuestros cambios
 		for (String vecinoinformado : this.info.informado.keySet()) {
 			this.info.informado.replace(vecinoinformado, false);
 		}
-		this.log.print("Fin updateCostoVecino");
+		this.log.print(" Hubieron cambios en el distance vector");
+		print();
 	}
 }

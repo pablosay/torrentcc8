@@ -43,7 +43,7 @@ public class Server implements Runnable {
                         if (mensajeClienteTokenizado[1].contains("HELLO")) {
                             String test = "From:" + dv.esteNodo + "\n" + "Type:WELCOME";
                             out.writeUTF(test);
-                            this.dv.updateclientes(this.vecino, true);
+                            this.dv.info.clientes.put(vecino, true);
                             // Si hay un keepAlive solo imprime
                         } else if (mensajeClienteTokenizado[1].contains("KeepAlive")) {
                         }
@@ -73,10 +73,10 @@ public class Server implements Runnable {
                 }
             }
             this.log.print(" Se perdio conexion con " + this.vecino);
-            this.dv.updateclientes(this.vecino, false);
-            this.dv.updateinformado(this.vecino, true);
+            this.dv.info.clientes.put(vecino, false);
+            this.dv.info.informado.put(this.vecino, true);
             while (true) {
-                // Esperamos 10s para volver a intentar reconectar
+                // Esperamos tiempo U
                 Thread.sleep(this.tiempoU * 1000);
                 if (!this.dv.info.clientes.get(this.vecino)) {
                     log.print(" " + this.vecino + " perdio conexion");
@@ -90,15 +90,18 @@ public class Server implements Runnable {
         } catch (SocketException e) {
             if (e.toString().contains("Connection reset")) {
                 try {
-                    this.dv.updateclientes(this.vecino, false);
-                    this.dv.updateinformado(this.vecino, true);
+                    this.dv.info.clientes.put(this.vecino, false);
+                    this.dv.info.informado.put(this.vecino, true);
                     while (true) {
+                        // Esperamos tiempo U
                         Thread.sleep(this.tiempoU * 1000);
+                        // Si no esta conectado se le pone unreachable
                         if (!this.dv.info.clientes.get(this.vecino)) {
                             log.print(" " + this.vecino + " ya no se conecto");
                             this.dv.updateCostoVecino(this.vecino);
                             break;
                         } else {
+                            // Se conecta de nuevo
                             log.print(" " + this.vecino + " se conecto de nuevo");
                             break;
                         }

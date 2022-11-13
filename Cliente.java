@@ -50,8 +50,7 @@ public class Cliente implements Runnable {
                 String[] mensajeServerTokenizado = respuestaServidor.split("\n");
                 // Verificar que nos hayan enviado el welcome
                 if (mensajeServerTokenizado[1].contains("WELCOME")) {
-                    // Estamos escuchando al servidor del vecino
-                    this.dv.updateservers(vecino, true);
+                    this.dv.info.servers.put(vecino, true);
                 }
                 // Enviamos por primera vez nuestro DV
                 mensaje = "From:" + dv.esteNodo + "\nType:DV" + "\nLen:"
@@ -65,12 +64,16 @@ public class Cliente implements Runnable {
                 // Enviar mensaje
                 out.writeUTF(mensaje);
                 this.log.print(" DV enviado a " + this.vecino);
-                dv.updateinformado(this.vecino, true);
+                dv.info.informado.put(this.vecino, true);
                 while (true) {
+                    // Realizar el envio cada tiempo T
                     Thread.sleep(1000 * tiempoT);
+                    // Si el vecino esta informadio
                     if (dv.info.clientes.get(this.vecino)) {
+                        // Si estamos conectados al servidor
                         if (dv.info.servers.get(this.vecino)) {
-                            if (dv.cambiosDV && !dv.info.informado.get(this.vecino)) {
+                            // Si hubo cambio y esta no esta informado el vecino
+                            if (dv.cambio && !dv.info.informado.get(this.vecino)) {
                                 mensaje = "From:" + dv.esteNodo + "\nType:DV" + "\nLen:"
                                         + (dv.vectoresDeDistancia.get(dv.esteNodo).size() - 1);
                                 for (String vecinoi : dv.vectoresDeDistancia.get(dv.esteNodo).keySet()) {
@@ -79,38 +82,43 @@ public class Cliente implements Runnable {
                                                 + dv.vectoresDeDistancia.get(dv.esteNodo).get(vecinoi).costo;
                                     }
                                 }
+                                // Enviamos el mensaje
                                 out.writeUTF(mensaje);
-                                this.log.print(" Se envio el DV" + this.vecino);
-                                dv.updateinformado(this.vecino, true);
+                                this.log.print(" Se envio el DV a: " + this.vecino);
+                                // Ya se marca como informado
+                                dv.info.informado.put(this.vecino, true);
                             } else {
+                                // Mantiene abierta la conexion con KeepAlive
                                 log.print(" KeepAlive a " + this.vecino);
                                 mensaje = "From:" + dv.esteNodo;
                                 mensaje += "\nType:KeepAlive";
                                 out.writeUTF(mensaje);
                             }
                         } else {
-                            log.print(" No se puede enviar informacion a " + this.vecino);
-                            this.dv.updateservers(this.vecino, false);
+                            // No se puede conectar con el servidor
+                            log.print(" No se puede enviar informacion al servidor de  " + this.vecino);
+                            this.dv.info.servers.put(vecino, false);
                             break;
                         }
                     } else {
-                        log.print(" No se puede enviar informacion a (2) " + this.vecino);
-                        this.dv.updateservers(this.vecino, false);
+                        log.print(" No se puede enviar informacion al servidor de " + this.vecino);
+                        this.dv.info.servers.put(vecino, false);
                         break;
                     }
-                    int acumulador = 0;
+                    int contadorVecinosInformados = 0;
                     for (Boolean status : dv.info.informado.values()) {
                         if (status) {
-                            acumulador++;
+                            contadorVecinosInformados++;
                         }
                     }
-                    if (acumulador == dv.info.informado.size()) {
-                        dv.cambiosDV = false;
+                    if (contadorVecinosInformados == dv.info.informado.size()) {
+                        dv.cambio = false;
+                        // Como no hay cambios seguimos recorriendo el loop
                     }
                 }
             } else {
                 this.log.print(" No se logro conectar con " + this.vecino);
-                dv.updateinformado(this.vecino, true);
+                dv.info.informado.put(this.vecino, true);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -12,7 +12,7 @@ public class ClientManager implements Runnable {
         try {
             for (String vecino : dVector.ipVecinos.keySet()) {
                 if (!dVector.info.servers.get(vecino)) {
-                    String ip = this.dVector.ipVecinos.get(vecino).get("ip");
+                    String ip = this.dVector.ipVecinos.get(vecino);
                     this.log.print(" Conexion con: " + vecino);
                     Cliente cliente = new Cliente(ip, 9080, this.dVector, this.log, vecino, this.tiempoT);
                     new Thread(cliente).start();
@@ -23,7 +23,7 @@ public class ClientManager implements Runnable {
                 Thread.sleep(10 * 1000);
                 for (String vecino : dVector.ipVecinos.keySet()) {
                     if (dVector.info.clientes.get(vecino) && !dVector.info.servers.get(vecino)) {
-                        String ip = this.dVector.ipVecinos.get(vecino).get("ip");
+                        String ip = this.dVector.ipVecinos.get(vecino);
                         this.log.print(" Reconexion con: " + vecino);
                         Cliente client = new Cliente(ip, 9080, this.dVector, this.log, vecino, this.tiempoT);
                         new Thread(client).start();
