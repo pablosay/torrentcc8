@@ -1,5 +1,13 @@
-[lun, 7 nov. 2022 16:20:30 -0600]Adyacentes: {H={ip=192.168.1.43}}
-[lun, 7 nov. 2022 16:20:30 -0600] Vecinos (Adyacentes) : [G, H]
-[lun, 7 nov. 2022 16:20:30 -0600] DV: {G={G=G,0, H=H,20}}
-[lun, 7 nov. 2022 16:20:33 -0600]Recalculando rutas: H
-[lun, 7 nov. 2022 16:20:33 -0600] DV: {G={G=G,0, H=H,20}}
+[dom, 13 nov. 2022 13:52:46 -0600]Adyacentes: {H=192.168.1.25}
+[dom, 13 nov. 2022 13:52:46 -0600] Vecinos (Adyacentes) : [G, H]
+[dom, 13 nov. 2022 13:52:46 -0600] DV: {G={G=G,0, H=H,20}}
+[dom, 13 nov. 2022 13:52:50 -0600]Recalculando rutas: H
+[dom, 13 nov. 2022 13:52:50 -0600] DV: {G={G=G,0, H=H,20}}
+[dom, 13 nov. 2022 13:52:50 -0600] No hubieron cambios en de vectores de distancia 
+[dom, 13 nov. 2022 13:52:50 -0600] DV: {G={G=G,0, H=H,20}}
+[dom, 13 nov. 2022 13:53:26 -0600] Hubieron cambios en el distance vector
+[dom, 13 nov. 2022 13:53:26 -0600] DV: {G={G=G,0, H=H,20}}
+[dom, 13 nov. 2022 13:53:35 -0600]Recalculando rutas: H
+[dom, 13 nov. 2022 13:53:35 -0600] DV: {G={G=G,0, H=H,20}}
+[dom, 13 nov. 2022 13:53:35 -0600] No hubieron cambios en de vectores de distancia 
+[dom, 13 nov. 2022 13:53:35 -0600] DV: {G={G=G,0, H=H,20}}

@@ -6,6 +6,7 @@ public class ClientManager implements Runnable {
     public ClientManager(Log log, DistanceVector dVector, int tiempoT) {
         this.log = log;
         this.dVector = dVector;
+        this.tiempoT = tiempoT;
     }
 
     public void run() {

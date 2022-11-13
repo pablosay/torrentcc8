@@ -123,7 +123,6 @@ public class Cliente implements Runnable {
                 distanceVector.info.informado.put(this.vecino, true);
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }
