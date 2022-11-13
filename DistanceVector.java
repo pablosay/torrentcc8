@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.util.*;
 
@@ -15,12 +14,10 @@ public class DistanceVector {
 	public HashMap<String, HashMap<String, InformacionVecino>> rutas = new HashMap<String, HashMap<String, InformacionVecino>>();
 	public LinkedList<String> nodosDeLaRed = new LinkedList<String>();
 	public HashMap<String, String> vecinosCosto = new HashMap<String, String>();
+	
 	public Boolean cambiosDV = false;
-	// Meterlos en una clase
-	public HashMap<String, Boolean> informado = new HashMap<String, Boolean>();
-	public HashMap<String, Boolean> servers = new HashMap<String, Boolean>();
-	public HashMap<String, Boolean> clientes = new HashMap<String, Boolean>();
 
+	Informacion info = new Informacion();
 	/**
 	 * 
 	 * @param archivoConfiguracion Archivo para el log
@@ -104,9 +101,9 @@ public class DistanceVector {
 			costos.put(nodo, infovecino);
 			// Si estamos inicializando
 			if (inicializacion) {
-				this.clientes.put(nodo, false);
-				this.informado.put(nodo, false);
-				this.servers.put(nodo, false);
+				this.info.CliPut(nodo);
+				this.info.AvisoPut(nodo);
+				this.info.ServePut(nodo);
 			}
 		}
 		this.vectoresDeDistancia.put(this.esteNodo, costos);
@@ -190,8 +187,8 @@ public class DistanceVector {
 		print();
 		if (!antesDePosibleCambio.equals(despuesDePosibleCambio)) {
 			this.cambiosDV = true;
-			for (String vecinoinformado : this.informado.keySet()) {
-				this.informado.replace(vecinoinformado, false);
+			for (String vecinoinformado : this.info.informado.keySet()) {
+				this.info.informado.replace(vecinoinformado, false);
 			}
 		}
 	}
@@ -201,23 +198,23 @@ public class DistanceVector {
 		log.print(" DV: " + this.vectoresDeDistancia.toString());
 	}
 
-	/* Cuando se envia el distance vector a un vecino se actualiza a informado */
+	/* Cuando se envia el distance vector a un vecino se actualiza a informado */ 
 	public void updateinformado(String vecino, Boolean notificado) {
-		this.informado.put(vecino, notificado);
+		this.info.informado.put(vecino, notificado);
 	}
 
-	/* Cuando un cliente se conecto al servidor del distance vector */
+	/* Cuando un cliente se conecto al servidor del distance vector */  /* ✔ */
 	public void updateclientes(String vecino, Boolean conectado) {
-		if (this.clientes.containsKey(vecino)) {
-			this.clientes.replace(vecino, conectado);
+		if (this.info.clientes.containsKey(vecino)) {
+			this.info.clientes.replace(vecino, conectado);
 		} else {
-			this.clientes.put(vecino, conectado);
+			this.info.clientes.put(vecino, conectado);
 		}
 	}
 
 	/* Cuando me conecto a un servidor */
 	public void updateservers(String vecino, Boolean escuchando) {
-		this.servers.put(vecino, escuchando);
+		this.info.servers.put(vecino, escuchando);
 	}
 
 	/*
@@ -241,8 +238,8 @@ public class DistanceVector {
 		this.reiniciar(false);
 		this.nuevaRuta(datos, this.esteNodo);
 		this.cambiosDV = true;
-		for (String vecinoinformado : this.informado.keySet()) {
-			this.informado.replace(vecinoinformado, false);
+		for (String vecinoinformado : this.info.informado.keySet()) {
+			this.info.informado.replace(vecinoinformado, false);
 		}
 		this.log.print("Fin updateCostoVecino");
 	}

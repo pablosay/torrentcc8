@@ -62,9 +62,9 @@ public class Cliente implements Runnable {
                 dv.updateinformado(this.vecino, true);
                 while (true) {
                     Thread.sleep(30000);
-                    if (dv.clientes.get(this.vecino)) {
-                        if (dv.servers.get(this.vecino)) {
-                            if (dv.cambiosDV && !dv.informado.get(this.vecino)) {
+                    if (dv.info.clientes.get(this.vecino)) {
+                        if (dv.info.servers.get(this.vecino)) {
+                            if (dv.cambiosDV && !dv.info.informado.get(this.vecino)) {
                                 mensaje = "From:" + dv.esteNodo + "\nType:DV" + "\nLen:"
                                         + (dv.vectoresDeDistancia.get(dv.esteNodo).size() - 1);
                                 for (String vecinoi : dv.vectoresDeDistancia.get(dv.esteNodo).keySet()) {
@@ -93,12 +93,12 @@ public class Cliente implements Runnable {
                         break;
                     }
                     int acumulador = 0;
-                    for (Boolean status : dv.informado.values()) {
+                    for (Boolean status : dv.info.informado.values()) {
                         if (status) {
                             acumulador++;
                         }
                     }
-                    if (acumulador == dv.informado.size()) {
+                    if (acumulador == dv.info.informado.size()) {
                         dv.cambiosDV = false;
                     }
                 }

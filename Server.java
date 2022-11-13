@@ -77,7 +77,7 @@ public class Server implements Runnable {
             while (true) {
                 // Esperamos 10s para volver a intentar reconectar
                 Thread.sleep(3000);
-                if (!this.dv.clientes.get(this.vecino)) {
+                if (!this.dv.info.clientes.get(this.vecino)) {
                     log.print(" " + this.vecino + " perdio conexion");
                     this.dv.updateCostoVecino(this.vecino);
                     break;
@@ -93,7 +93,7 @@ public class Server implements Runnable {
                     this.dv.updateinformado(this.vecino, true);
                     while (true) {
                         Thread.sleep(3000);
-                        if (!this.dv.clientes.get(this.vecino)) {
+                        if (!this.dv.info.clientes.get(this.vecino)) {
                             log.print(" " + this.vecino + " ya no se conecto");
                             this.dv.updateCostoVecino(this.vecino);
                             break;
