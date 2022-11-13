@@ -1,9 +1,8 @@
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 import java.io.DataOutputStream;;
 
-public class mainTorrent {
+public class ProyectoFinalCC8 {
     public static final String ANSI_BLACK = "\u001B[30m";
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_GREEN = "\u001B[32m";
@@ -36,17 +35,14 @@ public class mainTorrent {
         DistanceVector dVector = new DistanceVector(config, arg[0], log);
         dVector.config();
 
-        // servidor
         Log log1 = new Log("./servidor.txt");
-        ServerManager servidorDistanceVector = new ServerManager(log1, dVector);
+        ServerManager servidorDistanceVector = new ServerManager(log1, dVector, Integer.parseInt(arg[2]));
         new Thread(servidorDistanceVector).start();
 
-        // clientes
         Log log2 = new Log("./cliente.txt");
-        ClientManager clienteDistanceVector = new ClientManager(log2, dVector);
+        ClientManager clienteDistanceVector = new ClientManager(log2, dVector, Integer.parseInt(arg[1]));
         new Thread(clienteDistanceVector).start();
 
-        // servidor forward
         int forwadPuerto = 1981;
         Log log3 = new Log("./servidorFowarding.txt");
         ServerFowardingManager servidorForward = new ServerFowardingManager(log3, dVector, forwadPuerto);

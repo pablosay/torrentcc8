@@ -4,13 +4,14 @@ import java.net.ServerSocket;
 public class ServerManager implements Runnable {
     Log log;
     int port = 9080;
-    int reconectar;
+    int tiempoU;
     ServerSocket socketServer;
     DistanceVector dVector;
 
-    public ServerManager(Log log, DistanceVector dVector) {
+    public ServerManager(Log log, DistanceVector dVector, int tiempoU) {
         this.log = log;
         this.dVector = dVector;
+        this.tiempoU = tiempoU;
     }
 
     public void run() {
@@ -19,7 +20,7 @@ public class ServerManager implements Runnable {
             socketServer = new ServerSocket(this.port);
             while (true) {
                 try {
-                    Server server = new Server(this.socketServer.accept(), this.dVector, this.log);
+                    Server server = new Server(this.socketServer.accept(), this.dVector, this.log, this.tiempoU);
                     new Thread(server).start();
                 } catch (Exception e) {
                     e.printStackTrace();

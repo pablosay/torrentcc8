@@ -11,11 +11,13 @@ public class Server implements Runnable {
     protected DistanceVector dv;
     protected Log log;
     protected String vecino;
+    protected int tiempoU;
 
-    public Server(Socket socket, DistanceVector dv, Log log) {
+    public Server(Socket socket, DistanceVector dv, Log log, int tiempoU) {
         this.socket = socket;
         this.dv = dv;
         this.log = log;
+        this.tiempoU = tiempoU;
     }
 
     public void run() {
@@ -69,14 +71,13 @@ public class Server implements Runnable {
                 } catch (Exception e) {
                     break;
                 }
-
             }
             this.log.print(" Se perdio conexion con " + this.vecino);
             this.dv.updateclientes(this.vecino, false);
             this.dv.updateinformado(this.vecino, true);
             while (true) {
                 // Esperamos 10s para volver a intentar reconectar
-                Thread.sleep(3000);
+                Thread.sleep(this.tiempoU * 1000);
                 if (!this.dv.info.clientes.get(this.vecino)) {
                     log.print(" " + this.vecino + " perdio conexion");
                     this.dv.updateCostoVecino(this.vecino);
@@ -92,7 +93,7 @@ public class Server implements Runnable {
                     this.dv.updateclientes(this.vecino, false);
                     this.dv.updateinformado(this.vecino, true);
                     while (true) {
-                        Thread.sleep(3000);
+                        Thread.sleep(this.tiempoU * 1000);
                         if (!this.dv.info.clientes.get(this.vecino)) {
                             log.print(" " + this.vecino + " ya no se conecto");
                             this.dv.updateCostoVecino(this.vecino);

@@ -11,13 +11,15 @@ public class Cliente implements Runnable {
     protected DistanceVector dv;
     protected Log log;
     protected String vecino;
+    protected int tiempoT;
 
-    public Cliente(String ip, Integer puerto, DistanceVector dv, Log log, String vecino) {
+    public Cliente(String ip, Integer puerto, DistanceVector dv, Log log, String vecino, int tiempoT) {
         this.ip = ip;
         this.puerto = puerto;
         this.dv = dv;
         this.log = log;
         this.vecino = vecino;
+        this.tiempoT = tiempoT;
     }
 
     public void run() {
@@ -32,10 +34,13 @@ public class Cliente implements Runnable {
             } catch (Exception e) {
             }
             if (this.socket != null) {
+                // DataInput y DataOutput
                 DataInputStream in = new DataInputStream(this.socket.getInputStream());
                 DataOutputStream out = new DataOutputStream(this.socket.getOutputStream());
                 this.log.print(" HELLO a: " + this.vecino);
+                // Mensaje a a enviar al servidor
                 String mensaje = "From:" + dv.esteNodo + "\nType:HELLO";
+                // Enviar mensaje
                 out.writeUTF(mensaje);
                 // Recibir mensaje del servidor
                 String respuestaServidor = in.readUTF();
@@ -57,11 +62,12 @@ public class Cliente implements Runnable {
                                 + dv.vectoresDeDistancia.get(dv.esteNodo).get(vecinoi).costo;
                     }
                 }
+                // Enviar mensaje
                 out.writeUTF(mensaje);
                 this.log.print(" DV enviado a " + this.vecino);
                 dv.updateinformado(this.vecino, true);
                 while (true) {
-                    Thread.sleep(30000);
+                    Thread.sleep(1000 * tiempoT);
                     if (dv.info.clientes.get(this.vecino)) {
                         if (dv.info.servers.get(this.vecino)) {
                             if (dv.cambiosDV && !dv.info.informado.get(this.vecino)) {

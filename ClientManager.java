@@ -1,8 +1,9 @@
 public class ClientManager implements Runnable {
-    Log log;
-    DistanceVector dVector;
+    public Log log;
+    public DistanceVector dVector;
+    public int tiempoT;
 
-    public ClientManager(Log log, DistanceVector dVector) {
+    public ClientManager(Log log, DistanceVector dVector, int tiempoT) {
         this.log = log;
         this.dVector = dVector;
     }
@@ -13,7 +14,7 @@ public class ClientManager implements Runnable {
                 if (!dVector.info.servers.get(vecino)) {
                     String ip = this.dVector.ipVecinos.get(vecino).get("ip");
                     this.log.print(" Conexion con: " + vecino);
-                    Cliente cliente = new Cliente(ip, 9080, this.dVector, this.log, vecino);
+                    Cliente cliente = new Cliente(ip, 9080, this.dVector, this.log, vecino, this.tiempoT);
                     new Thread(cliente).start();
                 }
             }
@@ -24,7 +25,7 @@ public class ClientManager implements Runnable {
                     if (dVector.info.clientes.get(vecino) && !dVector.info.servers.get(vecino)) {
                         String ip = this.dVector.ipVecinos.get(vecino).get("ip");
                         this.log.print(" Reconexion con: " + vecino);
-                        Cliente client = new Cliente(ip, 9080, this.dVector, this.log, vecino);
+                        Cliente client = new Cliente(ip, 9080, this.dVector, this.log, vecino, this.tiempoT);
                         new Thread(client).start();
                     }
                 }
