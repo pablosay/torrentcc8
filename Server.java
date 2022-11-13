@@ -8,14 +8,14 @@ import java.io.DataOutputStream;
 public class Server implements Runnable {
 
     protected Socket socket;
-    protected DistanceVector dv;
+    protected DistanceVector distanceVector;
     protected Log log;
     protected String vecino;
     protected int tiempoU;
 
-    public Server(Socket socket, DistanceVector dv, Log log, int tiempoU) {
+    public Server(Socket socket, DistanceVector distanceVector, Log log, int tiempoU) {
         this.socket = socket;
-        this.dv = dv;
+        this.distanceVector = distanceVector;
         this.log = log;
         this.tiempoU = tiempoU;
     }
@@ -41,9 +41,9 @@ public class Server implements Runnable {
                     if (mensajeClienteTokenizado.length == 2) {
                         // Si manda un HELLO hay que devolverle un WELCOME
                         if (mensajeClienteTokenizado[1].contains("HELLO")) {
-                            String test = "From:" + dv.esteNodo + "\n" + "Type:WELCOME";
+                            String test = "From:" + distanceVector.esteNodo + "\n" + "Type:WELCOME";
                             out.writeUTF(test);
-                            this.dv.info.clientes.put(vecino, true);
+                            this.distanceVector.info.clientes.put(vecino, true);
                             // Si hay un keepAlive solo imprime
                         } else if (mensajeClienteTokenizado[1].contains("KeepAlive")) {
                         }
@@ -64,23 +64,23 @@ public class Server implements Runnable {
                                 " " + this.vecino + " envia el vector: "
                                         + adyacentesDeVecinoYSusCostos.toString());
                         // Agregar una nueva ruta
-                        dv.nuevaRuta(adyacentesDeVecinoYSusCostos, this.vecino);
+                        distanceVector.nuevaRuta(adyacentesDeVecinoYSusCostos, this.vecino);
                         // Calculamos la distancia mas corta al vecino
-                        dv.calcular(this.vecino);
+                        distanceVector.calcular(this.vecino);
                     }
                 } catch (Exception e) {
                     break;
                 }
             }
             this.log.print(" Se perdio conexion con " + this.vecino);
-            this.dv.info.clientes.put(vecino, false);
-            this.dv.info.informado.put(this.vecino, true);
+            this.distanceVector.info.clientes.put(vecino, false);
+            this.distanceVector.info.informado.put(this.vecino, true);
             while (true) {
                 // Esperamos tiempo U
                 Thread.sleep(this.tiempoU * 1000);
-                if (!this.dv.info.clientes.get(this.vecino)) {
+                if (!this.distanceVector.info.clientes.get(this.vecino)) {
                     log.print(" " + this.vecino + " perdio conexion");
-                    this.dv.updateCostoVecino(this.vecino);
+                    this.distanceVector.updateCostoVecino(this.vecino);
                     break;
                 } else {
                     log.print(" " + this.vecino + " se conecto de nuevo");
@@ -90,15 +90,15 @@ public class Server implements Runnable {
         } catch (SocketException e) {
             if (e.toString().contains("Connection reset")) {
                 try {
-                    this.dv.info.clientes.put(this.vecino, false);
-                    this.dv.info.informado.put(this.vecino, true);
+                    this.distanceVector.info.clientes.put(this.vecino, false);
+                    this.distanceVector.info.informado.put(this.vecino, true);
                     while (true) {
                         // Esperamos tiempo U
                         Thread.sleep(this.tiempoU * 1000);
                         // Si no esta conectado se le pone unreachable
-                        if (!this.dv.info.clientes.get(this.vecino)) {
+                        if (!this.distanceVector.info.clientes.get(this.vecino)) {
                             log.print(" " + this.vecino + " ya no se conecto");
-                            this.dv.updateCostoVecino(this.vecino);
+                            this.distanceVector.updateCostoVecino(this.vecino);
                             break;
                         } else {
                             // Se conecta de nuevo

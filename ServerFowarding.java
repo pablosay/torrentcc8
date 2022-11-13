@@ -5,16 +5,16 @@ import java.nio.file.Paths;
 
 public class ServerFowarding implements Runnable {
     Socket socket;
-    DistanceVector dv;
+    DistanceVector distanceVector;
     Log log;
     boolean existe = true;
     Integer sizeArchivoLocal = 0;
     Integer puerto = 1981;
     LinkedList<String> hexDelArchivo = new LinkedList<String>();
 
-    public ServerFowarding(Socket socket, DistanceVector dv, Log log) {
+    public ServerFowarding(Socket socket, DistanceVector distanceVector, Log log) {
         this.socket = socket;
-        this.dv = dv;
+        this.distanceVector = distanceVector;
         this.log = log;
     }
 
@@ -55,15 +55,16 @@ public class ServerFowarding implements Runnable {
                         // Largo del archivo
                         String largoDelArchivo = mensajeSeparadoPorNuevaLinea[3].split(":")[1].trim();
                         // Si es para este nodo solo contestamos la peticion
-                        if (destinatarioDelMensaje.equals(dv.esteNodo)) {
-                            String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(receptorDelMensaje).conQuien;
+                        if (destinatarioDelMensaje.equals(distanceVector.esteNodo)) {
+                            String ruta = distanceVector.vectoresDeDistancia.get(distanceVector.esteNodo)
+                                    .get(receptorDelMensaje).conQuien;
                             log.print(" Contestar peticion a " + receptorDelMensaje + " por medio de " + ruta);
-                            String ip = dv.ipVecinos.get(ruta);
+                            String ip = distanceVector.ipVecinos.get(ruta);
                             fragmentacionArchivo(nombreDelArchivo);
                             Socket socketEnvioArchivo = new Socket(ip, puerto);
                             DataOutputStream out = new DataOutputStream(socketEnvioArchivo.getOutputStream());
                             if (!existe) { // Revisar si existe el archivo
-                                String mensajeaenviar = "From:" + dv.esteNodo + "\nTo:" + receptorDelMensaje
+                                String mensajeaenviar = "From:" + distanceVector.esteNodo + "\nTo:" + receptorDelMensaje
                                         + "\nMsg: Favor enviar nombre de archivo correcto \nEOF";
                                 out.writeUTF(mensajeaenviar);
                                 out.close();
@@ -74,7 +75,8 @@ public class ServerFowarding implements Runnable {
                                     log.print(" Reenviar chunk " + i + " a " + receptorDelMensaje
                                             + " por medio de "
                                             + ruta);
-                                    String mensajeaenviar = "From:" + dv.esteNodo + "\nTo:" + receptorDelMensaje
+                                    String mensajeaenviar = "From:" + distanceVector.esteNodo + "\nTo:"
+                                            + receptorDelMensaje
                                             + "\nName:"
                                             + nombreDelArchivo + "\nData:" + hexDelArchivo.get(i) + "\nFrag:" + i + 1
                                             + "\nSize:"
@@ -87,9 +89,10 @@ public class ServerFowarding implements Runnable {
                             }
                             // Si no es para este nodo solo reenviamos la peticion
                         } else {
-                            String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(destinatarioDelMensaje).conQuien;
+                            String ruta = distanceVector.vectoresDeDistancia.get(distanceVector.esteNodo)
+                                    .get(destinatarioDelMensaje).conQuien;
                             log.print(" Reenviar peticion a " + destinatarioDelMensaje + " por medio de " + ruta);
-                            String ip = dv.ipVecinos.get(ruta);
+                            String ip = distanceVector.ipVecinos.get(ruta);
                             Socket socketRenvioArchivo = new Socket(ip, puerto);
                             DataOutputStream out = new DataOutputStream(socketRenvioArchivo.getOutputStream());
                             String mensajeenviar = "From:" + receptorDelMensaje + "\nTo:" + destinatarioDelMensaje
@@ -106,7 +109,7 @@ public class ServerFowarding implements Runnable {
                         receptorDelMensaje = mensajeSeparadoPorNuevaLinea[0].split(":")[1].trim();
                         // Obtener el destinatario
                         destinatarioDelMensaje = mensajeSeparadoPorNuevaLinea[1].split(":")[1].trim();
-                        if (destinatarioDelMensaje.equals(dv.esteNodo)) {
+                        if (destinatarioDelMensaje.equals(distanceVector.esteNodo)) {
                             // Nombre del archivo
                             String nombreDelArchivo = mensajeSeparadoPorNuevaLinea[2].split(":")[1].trim();
                             // Datos del archivo
@@ -146,11 +149,11 @@ public class ServerFowarding implements Runnable {
                             hexDelArchivo.add(datosDelArchivo);
                             sizeArchivoLocal += datosDelArchivo.length() / 2;
                             if (sizeArchivoLocal >= Integer.parseInt(largoDelArchivo)) {
-                                String ruta = dv.vectoresDeDistancia.get(dv.esteNodo)
+                                String ruta = distanceVector.vectoresDeDistancia.get(distanceVector.esteNodo)
                                         .get(destinatarioDelMensaje).conQuien;
                                 log.print(" Reenviar archivo " + nombreDelArchivo + " de " + hexDelArchivo.size()
                                         + " chunks a " + destinatarioDelMensaje + " por medio de " + ruta);
-                                String ip = dv.ipVecinos.get(ruta);
+                                String ip = distanceVector.ipVecinos.get(ruta);
                                 Socket socketRenvioArchivo = new Socket(ip, puerto);
                                 DataOutputStream out = new DataOutputStream(socketRenvioArchivo.getOutputStream());
                                 for (int i = 0; i < hexDelArchivo.size(); i++) {
@@ -174,15 +177,16 @@ public class ServerFowarding implements Runnable {
                         // Obtener el destinatario
                         destinatarioDelMensaje = mensajeSeparadoPorNuevaLinea[1].split(":")[1].trim();
                         // Ver si el error es para este nodo
-                        if (destinatarioDelMensaje.equals(dv.esteNodo)) {
+                        if (destinatarioDelMensaje.equals(distanceVector.esteNodo)) {
                             String mensajeError = mensajeSeparadoPorNuevaLinea[2].split(":")[1].trim();
                             log.print(" Ocurrio un error al recibir el archivo: " + mensajeError);
                             break;
                             // Si no es para este nodo lo reenvia
                         } else {
-                            String ruta = dv.vectoresDeDistancia.get(dv.esteNodo).get(destinatarioDelMensaje).conQuien;
+                            String ruta = distanceVector.vectoresDeDistancia.get(distanceVector.esteNodo)
+                                    .get(destinatarioDelMensaje).conQuien;
                             log.print(" Reenviar mensaje a " + destinatarioDelMensaje + " por medio de " + ruta);
-                            String ip = dv.ipVecinos.get(ruta);
+                            String ip = distanceVector.ipVecinos.get(ruta);
                             Socket socketRenvioError = new Socket(ip, puerto);
                             DataOutputStream out = new DataOutputStream(socketRenvioError.getOutputStream());
                             String mensajeError = mensajeSeparadoPorNuevaLinea[2].split(":")[1].trim();
