@@ -36,37 +36,41 @@ public class Server implements Runnable {
                     }
                     // Obtener la letra del vecino que nos manda el mensaje
                     String[] tokenDeMensajeFrom = mensajeClienteTokenizado[0].split(":");
-                    this.vecino = tokenDeMensajeFrom[1];
-                    // Si es de dos lineas es un HELLO o un keep alive
-                    if (mensajeClienteTokenizado.length == 2) {
-                        // Si manda un HELLO hay que devolverle un WELCOME
-                        if (mensajeClienteTokenizado[1].contains("HELLO")) {
-                            String test = "From:" + distanceVector.esteNodo + "\n" + "Type:WELCOME";
-                            out.writeUTF(test);
-                            this.distanceVector.info.clientes.put(vecino, true);
-                            // Si hay un keepAlive solo imprime
-                        } else if (mensajeClienteTokenizado[1].contains("KeepAlive")) {
+                    if (tokenDeMensajeFrom.length >= 2) {
+                        this.vecino = tokenDeMensajeFrom[1];
+                        // Si es de dos lineas es un HELLO o un keep alive
+                        if (mensajeClienteTokenizado.length == 2) {
+                            // Si manda un HELLO hay que devolverle un WELCOME
+                            if (mensajeClienteTokenizado[1].contains("HELLO")) {
+                                String test = "From:" + distanceVector.esteNodo + "\n" + "Type:WELCOME";
+                                out.writeUTF(test);
+                                this.distanceVector.info.clientes.put(vecino, true);
+                                // Si hay un keepAlive solo imprime
+                            } else if (mensajeClienteTokenizado[1].contains("KeepAlive")) {
+                            }
+                            // Si el largo del mensaje tokenizado es mayor a 2 significa que hay cambios en
+                            // los vectores de distancia.
+                        } else {
+                            // HashMap para agregar los datos de los vecinos y sus adyacentes
+                            HashMap<String, String> adyacentesDeVecinoYSusCostos = new HashMap<String, String>();
+                            // Recorremsos los vecinos del adyacente y los almacenamos
+                            for (int i = 3; i < mensajeClienteTokenizado.length; i++) {
+                                String[] tokensVecinoCosto = mensajeClienteTokenizado[i].split(":");
+                                if (tokensVecinoCosto.length >= 2) {
+                                    String adyacente = tokensVecinoCosto[0];
+                                    String costo = tokensVecinoCosto[1];
+                                    adyacentesDeVecinoYSusCostos.put(adyacente, costo);
+                                }
+                            }
+                            // Imprimos los vectores que nos enviaron
+                            this.log.print(
+                                    " " + this.vecino + " envia el vector: "
+                                            + adyacentesDeVecinoYSusCostos.toString());
+                            // Agregar una nueva ruta
+                            distanceVector.nuevaRuta(adyacentesDeVecinoYSusCostos, this.vecino);
+                            // Calculamos la distancia mas corta al vecino
+                            distanceVector.calcular(this.vecino);
                         }
-                        // Si el largo del mensaje tokenizado es mayor a 2 significa que hay cambios en
-                        // los vectores de distancia.
-                    } else {
-                        // HashMap para agregar los datos de los vecinos y sus adyacentes
-                        HashMap<String, String> adyacentesDeVecinoYSusCostos = new HashMap<String, String>();
-                        // Recorremsos los vecinos del adyacente y los almacenamos
-                        for (int i = 3; i < mensajeClienteTokenizado.length; i++) {
-                            String[] tokensVecinoCosto = mensajeClienteTokenizado[i].split(":");
-                            String adyacente = tokensVecinoCosto[0];
-                            String costo = tokensVecinoCosto[1];
-                            adyacentesDeVecinoYSusCostos.put(adyacente, costo);
-                        }
-                        // Imprimos los vectores que nos enviaron
-                        this.log.print(
-                                " " + this.vecino + " envia el vector: "
-                                        + adyacentesDeVecinoYSusCostos.toString());
-                        // Agregar una nueva ruta
-                        distanceVector.nuevaRuta(adyacentesDeVecinoYSusCostos, this.vecino);
-                        // Calculamos la distancia mas corta al vecino
-                        distanceVector.calcular(this.vecino);
                     }
                 } catch (Exception e) {
                     break;
