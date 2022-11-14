@@ -9,7 +9,7 @@ public class ServerFowarding implements Runnable {
     Log log;
     boolean existe = true;
     Integer sizeArchivoLocal = 0;
-    Integer puerto = 1981;
+    Integer puerto = 9081;
     LinkedList<String> hexDelArchivo = new LinkedList<String>();
 
     public ServerFowarding(Socket socket, DistanceVector distanceVector, Log log) {
@@ -61,7 +61,7 @@ public class ServerFowarding implements Runnable {
                             log.print(" Contestar peticion a " + receptorDelMensaje + " por medio de " + ruta);
                             String ip = distanceVector.ipVecinos.get(ruta);
                             fragmentacionArchivo(nombreDelArchivo);
-                            Socket socketEnvioArchivo = new Socket(ip, puerto);
+                            Socket socketEnvioArchivo = new Socket(ip, this.puerto);
                             DataOutputStream out = new DataOutputStream(socketEnvioArchivo.getOutputStream());
                             if (!existe) { // Revisar si existe el archivo
                                 String mensajeaenviar = "From:" + distanceVector.esteNodo + "\nTo:" + receptorDelMensaje
@@ -93,7 +93,7 @@ public class ServerFowarding implements Runnable {
                                     .get(destinatarioDelMensaje).conQuien;
                             log.print(" Reenviar peticion a " + destinatarioDelMensaje + " por medio de " + ruta);
                             String ip = distanceVector.ipVecinos.get(ruta);
-                            Socket socketRenvioArchivo = new Socket(ip, puerto);
+                            Socket socketRenvioArchivo = new Socket(ip, this.puerto);
                             DataOutputStream out = new DataOutputStream(socketRenvioArchivo.getOutputStream());
                             String mensajeenviar = "From:" + receptorDelMensaje + "\nTo:" + destinatarioDelMensaje
                                     + "\nName:" + nombreDelArchivo
@@ -154,7 +154,7 @@ public class ServerFowarding implements Runnable {
                                 log.print(" Reenviar archivo " + nombreDelArchivo + " de " + hexDelArchivo.size()
                                         + " chunks a " + destinatarioDelMensaje + " por medio de " + ruta);
                                 String ip = distanceVector.ipVecinos.get(ruta);
-                                Socket socketRenvioArchivo = new Socket(ip, puerto);
+                                Socket socketRenvioArchivo = new Socket(ip, this.puerto);
                                 DataOutputStream out = new DataOutputStream(socketRenvioArchivo.getOutputStream());
                                 for (int i = 0; i < hexDelArchivo.size(); i++) {
                                     log.print(" Reenviar chunk " + (i + 1) + " a " + destinatarioDelMensaje
@@ -187,7 +187,7 @@ public class ServerFowarding implements Runnable {
                                     .get(destinatarioDelMensaje).conQuien;
                             log.print(" Reenviar mensaje a " + destinatarioDelMensaje + " por medio de " + ruta);
                             String ip = distanceVector.ipVecinos.get(ruta);
-                            Socket socketRenvioError = new Socket(ip, puerto);
+                            Socket socketRenvioError = new Socket(ip, this.puerto);
                             DataOutputStream out = new DataOutputStream(socketRenvioError.getOutputStream());
                             String mensajeError = mensajeSeparadoPorNuevaLinea[2].split(":")[1].trim();
                             String mensaje = "From:" + receptorDelMensaje + "\nTo:" + destinatarioDelMensaje + "\nMsg:"

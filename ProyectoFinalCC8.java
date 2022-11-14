@@ -43,7 +43,7 @@ public class ProyectoFinalCC8 {
         ClientManager clienteDistanceVector = new ClientManager(log2, dVector, Integer.parseInt(arg[1]));
         new Thread(clienteDistanceVector).start();
 
-        int forwadPuerto = 1981;
+        int forwadPuerto = 9081;
         Log log3 = new Log("./servidorFowarding.txt");
         ServerFowardingManager servidorForward = new ServerFowardingManager(log3, dVector, forwadPuerto);
         new Thread(servidorForward).start();
@@ -71,9 +71,9 @@ public class ProyectoFinalCC8 {
             System.out.println("Continuar? (y/n)");
             String descision = input.nextLine();
             if (descision.equals("y")) {
-                Socket smensaje = new Socket("127.0.0.1", 1981); // puerto del server de fowarding
+                Socket smensaje = new Socket("127.0.0.1", 9081); // puerto del server de fowarding
                 DataOutputStream out = new DataOutputStream(smensaje.getOutputStream());
-                String msj = "From: " + arg[0] + "\nTo: " + nodo + "\nName: " + archivo + "\nSize: " + tamano + "\nEOF";
+                String msj = "From:" + arg[0] + "\nTo:" + nodo + "\nName:" + archivo + "\nSize:" + tamano + "\nEOF";
                 out.writeUTF(msj);
                 smensaje.close();
             }
