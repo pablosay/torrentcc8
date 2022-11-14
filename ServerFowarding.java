@@ -213,7 +213,7 @@ public class ServerFowarding implements Runnable {
     public void fragmentacionArchivo(String nombreArchivo) {
         try {
             InputStream archivoaenviar = new FileInputStream(new File("ArchivosEnviar/" + nombreArchivo));
-            byte almacen[] = new byte[256];
+            byte almacen[] = new byte[1046];
             hexDelArchivo.clear();
             int lel = archivoaenviar.read(almacen);
             while (lel > 0) {
