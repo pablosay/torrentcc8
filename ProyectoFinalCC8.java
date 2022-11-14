@@ -43,9 +43,9 @@ public class ProyectoFinalCC8 {
         ClientManager clienteDistanceVector = new ClientManager(log2, dVector, Integer.parseInt(arg[1]));
         new Thread(clienteDistanceVector).start();
 
-        int forwadPuerto = 9081;
         Log log3 = new Log("./servidorFowarding.txt");
-        ServerFowardingManager servidorForward = new ServerFowardingManager(log3, dVector, forwadPuerto);
+        int forwardPort = 9081;
+        ServerFowardingManager servidorForward = new ServerFowardingManager(log3, dVector, forwardPort);
         new Thread(servidorForward).start();
         Scanner input = new Scanner(System.in);
         System.out.println(ANSI_GREEN + "+-------Proyecto Final CC8-------+");
