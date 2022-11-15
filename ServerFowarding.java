@@ -118,6 +118,41 @@ public class ServerFowarding implements Runnable {
                                 for (int i = 0; i < mensajeSeparadoPorNuevaLinea2.length; i++) {
                                     this.log.print(" " + mensajeSeparadoPorNuevaLinea2[i]);
                                 }
+                                if (destinatarioDelMensaje.equals(distanceVector.esteNodo))
+                                    this.log.print("llego ponele");
+                                    // Nombre del archivo
+                                    nombreDelArchivo = mensajeSeparadoPorNuevaLinea2[2].split(":")[1].trim();
+                                    // Datos del archivo
+                                    String datosDelArchivo = mensajeSeparadoPorNuevaLinea2[3].split(":")[1].trim();
+                                    // Largo del archivo
+                                    largoDelArchivo = mensajeSeparadoPorNuevaLinea2[5].split(":")[1].trim();
+                                    // Agregar los datos
+                                    hexDelArchivo.add(datosDelArchivo);
+                                    // Se va incrementando el largo del archivo
+                                    sizeArchivoLocal += datosDelArchivo.length() / 2;
+                                    // Verificamos si ya estan todos los chunks del archivo
+                                    if (sizeArchivoLocal >= Integer.parseInt(largoDelArchivo)) {
+                                        log.print(" Se han recibido los " + hexDelArchivo.size() + " chunks del arvhivo "
+                                                + nombreDelArchivo + " enviados por " + receptorDelMensaje);
+                                        String archivoStr = "";
+                                        for (int i = 0; i < hexDelArchivo.size(); i++) {
+                                            archivoStr += hexDelArchivo.get(i);
+                                        }
+                                        // Obtenemos el arreglo de bytes para guardar el archivo
+                                        byte archivo[] = hexStringToByteArray(archivoStr);
+                                        String guardar = Paths.get(nombreDelArchivo).getFileName().toString();
+                                        File archivoaescribir = new File("./Recibidos/" + guardar);
+                                        OutputStream os = new FileOutputStream(archivoaescribir);
+                                        os.write(archivo);
+                                        os.close();
+                                        log.print(" Archivo almacenado");
+                                        sizeArchivoLocal=0;
+                                        hexDelArchivo.clear();
+                                        break;
+                                    }
+                                    // Si los archivos no son para este nodo reenviamos los datos
+                                
+
                             }
                             //this.socket.close();
                             //break;

@@ -1,6 +1,6 @@
-[lun, 14 nov. 2022 21:05:42 -0600] Conexion con: Z
-[lun, 14 nov. 2022 21:05:43 -0600] HELLO a: Z
-[lun, 14 nov. 2022 21:05:43 -0600] Servidor responde: From:Z
+[lun, 14 nov. 2022 21:11:36 -0600] Conexion con: Z
+[lun, 14 nov. 2022 21:11:38 -0600] HELLO a: Z
+[lun, 14 nov. 2022 21:11:38 -0600] Servidor responde: From:Z
 Type:WELCOME
-[lun, 14 nov. 2022 21:05:43 -0600] distanceVector enviado a Z
-[lun, 14 nov. 2022 21:06:13 -0600] No se puede enviar informacion al servidor de Z
+[lun, 14 nov. 2022 21:11:38 -0600] distanceVector enviado a Z
+[lun, 14 nov. 2022 21:12:08 -0600] No se puede enviar informacion al servidor de Z
