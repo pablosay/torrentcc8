@@ -9,7 +9,7 @@ public class ServerFowarding implements Runnable {
     Log log;
     boolean existe = true;
     Integer sizeArchivoLocal = 0;
-    Integer puerto = 9081;
+    Integer puerto = 4500;
     LinkedList<String> hexDelArchivo = new LinkedList<String>();
 
     public ServerFowarding(Socket socket, DistanceVector distanceVector, Log log) {
@@ -33,14 +33,19 @@ public class ServerFowarding implements Runnable {
                     } catch (EOFException e) {
                         continue;
                     }
-
+                    this.log.print(mensajeDeOtroServidor);
                     // Separarlo por lineas
                     String[] mensajeSeparadoPorNuevaLinea = mensajeDeOtroServidor.split("\n");
+
+                    for (int i = 0; i < mensajeSeparadoPorNuevaLinea.length; i++) {
+                        this.log.print(" " + mensajeSeparadoPorNuevaLinea[i]);
+                    }
                     // Si el largo
                     if (mensajeSeparadoPorNuevaLinea.length == 5) {
                         peticionRespuestaError = "peticion";
                     } else if (mensajeSeparadoPorNuevaLinea.length == 7) {
                         peticionRespuestaError = "datos";
+                        this.log.print("SI lee que van a caer datoss");
                     } else if (mensajeSeparadoPorNuevaLinea.length == 4) {
                         peticionRespuestaError = "error";
                     }
@@ -61,14 +66,14 @@ public class ServerFowarding implements Runnable {
                             log.print(" Contestar peticion a " + receptorDelMensaje + " por medio de " + ruta);
                             String ip = distanceVector.ipVecinos.get(ruta);
                             fragmentacionArchivo(nombreDelArchivo);
-                            Socket socketEnvioArchivo = new Socket(ip, this.puerto);
-                            DataOutputStream out = new DataOutputStream(socketEnvioArchivo.getOutputStream());
+                            //Socket socketEnvioArchivo = new Socket(ip, this.puerto);
+                            DataOutputStream out = new DataOutputStream(this.socket.getOutputStream());
                             if (!existe) { // Revisar si existe el archivo
                                 String mensajeaenviar = "From:" + distanceVector.esteNodo + "\nTo:" + receptorDelMensaje
                                         + "\nMsg: Favor enviar nombre de archivo correcto \nEOF";
                                 out.writeUTF(mensajeaenviar);
                                 out.close();
-                                socketEnvioArchivo.close();
+                                //socketEnvioArchivo.close();
                                 break;
                             } else {
                                 for (int i = 0; i < hexDelArchivo.size(); i++) {
@@ -78,13 +83,13 @@ public class ServerFowarding implements Runnable {
                                     String mensajeaenviar = "From:" + distanceVector.esteNodo + "\nTo:"
                                             + receptorDelMensaje
                                             + "\nName:"
-                                            + nombreDelArchivo + "\nData:" + hexDelArchivo.get(i) + "\nFrag:" + i + 1
+                                            + nombreDelArchivo + "\nData:" + hexDelArchivo.get(i) + "\nFrag:" + i
                                             + "\nSize:"
                                             + largoDelArchivo + "\nEOF";
                                     out.writeUTF(mensajeaenviar);
                                 }
                                 out.close();
-                                socketEnvioArchivo.close();
+                                //socketEnvioArchivo.close();
                                 break;
                             }
                             // Si no es para este nodo solo reenviamos la peticion
@@ -95,13 +100,27 @@ public class ServerFowarding implements Runnable {
                             String ip = distanceVector.ipVecinos.get(ruta);
                             Socket socketRenvioArchivo = new Socket(ip, this.puerto);
                             DataOutputStream out = new DataOutputStream(socketRenvioArchivo.getOutputStream());
+                            DataInputStream in2 =  new DataInputStream(socketRenvioArchivo.getInputStream());
                             String mensajeenviar = "From:" + receptorDelMensaje + "\nTo:" + destinatarioDelMensaje
                                     + "\nName:" + nombreDelArchivo
                                     + "\nSize:" + largoDelArchivo + "\nEOF";
                             out.writeUTF(mensajeenviar);
-                            out.close();
-                            socketRenvioArchivo.close();
-                            break;
+                            out.flush();
+                            String x;
+                            while (true) {
+                                try {
+                                    x = in2.readUTF();
+                                } catch (EOFException e) {
+                                    continue;
+                                }
+                                String[] mensajeSeparadoPorNuevaLinea2 = x.split("\n");
+                                
+                                for (int i = 0; i < mensajeSeparadoPorNuevaLinea2.length; i++) {
+                                    this.log.print(" " + mensajeSeparadoPorNuevaLinea2[i]);
+                                }
+                            }
+                            //this.socket.close();
+                            //break;
                         }
                         // Si son datos
                     } else if (peticionRespuestaError.equals("datos")) {
@@ -110,6 +129,7 @@ public class ServerFowarding implements Runnable {
                         // Obtener el destinatario
                         destinatarioDelMensaje = mensajeSeparadoPorNuevaLinea[1].split(":")[1].trim();
                         if (destinatarioDelMensaje.equals(distanceVector.esteNodo)) {
+                            this.log.print("llego ponele");
                             // Nombre del archivo
                             String nombreDelArchivo = mensajeSeparadoPorNuevaLinea[2].split(":")[1].trim();
                             // Datos del archivo
@@ -202,7 +222,7 @@ public class ServerFowarding implements Runnable {
                         break;
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    
                 }
             }
         } catch (Exception e) {
@@ -213,7 +233,7 @@ public class ServerFowarding implements Runnable {
     public void fragmentacionArchivo(String nombreArchivo) {
         try {
             InputStream archivoaenviar = new FileInputStream(new File("ArchivosEnviar/" + nombreArchivo));
-            byte almacen[] = new byte[1046];
+            byte almacen[] = new byte[1460];
             hexDelArchivo.clear();
             int lel = archivoaenviar.read(almacen);
             while (lel > 0) {

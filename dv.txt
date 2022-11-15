@@ -1,3 +1,9 @@
-[dom, 13 nov 2022 23:18:15 -0600]Adyacentes: {G=25.12.152.10, J=25.66.48.227}
-[dom, 13 nov 2022 23:18:15 -0600] Vecinos (Adyacentes) : [H, G, J]
-[dom, 13 nov 2022 23:18:15 -0600] DV: {H={G=G,20, H=H,0, J=J,10}}
+[lun, 14 nov. 2022 21:05:42 -0600]Adyacentes: {Z=25.4.161.213}
+[lun, 14 nov. 2022 21:05:42 -0600] Vecinos (Adyacentes) : [J, Z]
+[lun, 14 nov. 2022 21:05:42 -0600] DV: {J={J=J,0, Z=Z,3}}
+[lun, 14 nov. 2022 21:05:43 -0600]Recalculando rutas: Z
+[lun, 14 nov. 2022 21:05:43 -0600] DV: {J={J=J,0, Z=Z,3}}
+[lun, 14 nov. 2022 21:05:43 -0600] No hubieron cambios en de vectores de distancia 
+[lun, 14 nov. 2022 21:05:43 -0600] DV: {J={J=J,0, Z=Z,3}}
+[lun, 14 nov. 2022 21:05:59 -0600] Hubieron cambios en el distance vector
+[lun, 14 nov. 2022 21:05:59 -0600] DV: {J={J=J,0, Z=Z,3}}
